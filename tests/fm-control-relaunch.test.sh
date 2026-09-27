@@ -2003,6 +2003,80 @@ make_herdr_stub() {  # <case-dir>
 set -u
 D=$FM_FAKE_DIR
 printf '%s\n' "$*" >> "$D/herdr-log"
+# An opt-in Claude pane (claude-pane): the agent is live while claude-live
+# exists, claude-composer holds the typed text, and a pane read renders the
+# 40-row viewport Claude Code 2.1.283 draws. A typed slash command opens the
+# command popup between the composer and the pane bottom; live it left 22 rows
+# below the composer, so a bounded 20-row tail holds only popup rows.
+claude_screen() {
+  local composer rule i
+  if [ ! -f "$D/claude-live" ]; then
+    for ((i = 0; i < 39; i++)); do printf '\n'; done
+    printf '$ \n'
+    return 0
+  fi
+  composer=$(cat "$D/claude-composer" 2>/dev/null || true)
+  rule=$(printf '%0.s\xe2\x94\x80' $(seq 1 60))
+  printf ' \xe2\x96\x90\xe2\x96\x9b\xe2\x96\x88\xe2\x96\x88\xe2\x96\x88\xe2\x96\x9c\xe2\x96\x8c   Claude Code v2.1.283\n'
+  case "$composer" in
+    /*)
+      for ((i = 0; i < 14; i++)); do printf '\n'; done
+      printf '%s\n\xe2\x9d\xaf %s\n%s\n' "$rule" "$composer" "$rule"
+      printf '  %s    Exit the CLI\n' "$composer"
+      for ((i = 0; i < 21; i++)); do
+        printf '  /skill-%02d    A skill description long enough to read as a popup row\n' "$i"
+      done
+      ;;
+    *)
+      for ((i = 0; i < 35; i++)); do printf '\n'; done
+      printf '%s\n\xe2\x9d\xaf %s\n%s\n' "$rule" "$composer" "$rule"
+      printf '  \xe2\x8f\xb5\xe2\x8f\xb5 bypass permissions on (shift+tab to cycle)\n'
+      ;;
+  esac
+}
+if [ -f "$D/claude-pane" ]; then
+  case "${1:-} ${2:-}" in
+    'agent get')
+      if [ -f "$D/claude-live" ]; then
+        printf '{"result":{"agent":{"agent":"claude","agent_status":"idle"}}}\n'
+      else
+        printf '{"error":{"code":"agent_not_found"}}\n'
+      fi
+      exit 0 ;;
+    'pane read')
+      # --source visible is the viewport; --lines N is its last N rows.
+      lines=
+      prev=
+      for arg in "$@"; do
+        [ "$prev" != --lines ] || lines=$arg
+        prev=$arg
+      done
+      if [ -n "$lines" ]; then
+        claude_screen | tail -n "$lines"
+      else
+        claude_screen
+      fi
+      exit 0 ;;
+    'pane send-keys')
+      printf '%s\n' "${4:-}" >> "$D/claude-keys"
+      case "${4:-}" in
+        ctrl+u) : > "$D/claude-composer" ;;
+        enter)
+          if [ -f "$D/claude-live" ] && [ "$(cat "$D/claude-composer" 2>/dev/null)" = /exit ]; then
+            rm -f "$D/claude-live"
+          fi
+          : > "$D/claude-composer" ;;
+      esac
+      exit 0 ;;
+    'pane send-text')
+      if [ -f "$D/claude-live" ]; then
+        printf '%s' "${4:-}" >> "$D/claude-composer"
+        printf '%s\n' "${4:-}" >> "$D/claude-typed"
+        exit 0
+      fi
+      ;;
+  esac
+fi
 if [ "${1:-}" = status ] && [ "${2:-}" = --json ]; then
   if [ -f "$D/herdr-stopped" ]; then
     printf '{"client":{"version":"0.9.0","protocol":22},"server":{"running":false}}\n'
@@ -2068,7 +2142,8 @@ case "${1:-} ${2:-}" in
     case "$payload" in
       *'encode launch-brief'* | *'Firstmate operational input waiting: read'*)
         printf '%s\n' "$payload" > "$D/launched-command"
-        : > "$D/herdr-agent-live" ;;
+        : > "$D/herdr-agent-live"
+        [ ! -f "$D/claude-pane" ] || : > "$D/claude-live" ;;
     esac
     exit 0 ;;
   'workspace list')
@@ -2253,6 +2328,44 @@ test_herdr_exit_reports_already_stopped_when_the_pane_outlived_its_server() {
   [ "$(meta_field "$dir" rl72 window)" = 'fmlab:%7' ] \
     || fail "exit must leave the recorded endpoint exactly as it found it"
   pass "fm-control exit: a herdr pane that outlived its stopped server is already-stopped, not gone"
+}
+
+# Claude Code draws its slash-command popup between the composer and the pane
+# bottom, so a bounded 20-row tail read misses the composer that holds the
+# typed /exit. The pre-Enter payload proof then cleared the command and both
+# verbs failed with "the exit command could not be sent" (issue #5533). A live
+# idle Claude on Herdr must stop through relaunch and through exit.
+test_herdr_claude_exit_and_relaunch_stop_behind_the_slash_command_popup() {
+  local dir out rc=0
+  herdr_case_or_skip herdr-claude-popup rl80 || {
+    echo "skip - herdr claude exit needs jq (the herdr adapter parses JSON with it)"
+    return 0
+  }
+  dir=$HERDR_CASE_DIR
+  rm -f "$dir/fake/herdr-stopped"
+  : > "$dir/fake/claude-pane"
+  : > "$dir/fake/claude-live"
+  : > "$dir/fake/claude-composer"
+
+  out=$(run_control "$dir" rl80 relaunch --model sonnet --note "switch the model") || rc=$?
+  expect_code 0 "$rc" "relaunch must stop a live idle Claude behind its command popup"$'\n'"$out"
+  assert_contains "$out" "relaunched rl80 harness=claude from=claude model=sonnet" \
+    "the replacement should run on the requested model"
+  assert_contains "$(cat "$dir/fake/launched-command")" "--model 'sonnet'" \
+    "the replacement launch must carry the requested model"
+  [ -f "$dir/fake/claude-live" ] || fail "the replacement Claude never came up"
+
+  rc=0
+  out=$(run_control "$dir" rl80 exit) || rc=$?
+  expect_code 0 "$rc" "exit must stop a live idle Claude behind its command popup"$'\n'"$out"
+  assert_contains "$out" "stopped rl80 harness=claude backend=herdr endpoint=fmlab:%7" \
+    "exit should stop the agent and keep the recorded endpoint"
+  [ ! -f "$dir/fake/claude-live" ] || fail "exit reported success but the typed /exit was never submitted"
+  [ "$(cat "$dir/fake/claude-typed")" = $'/exit\n/exit' ] \
+    || fail "each stop must type /exit exactly once, typed: $(cat "$dir/fake/claude-typed")"
+  assert_not_contains "$(cat "$dir/fake/claude-keys")" "ctrl+u" \
+    "a composer proven to hold /exit must never be cleared"
+  pass "fm-control: relaunch and exit stop a live Claude on herdr behind its slash-command popup"
 }
 
 test_herdr_rebind_stays_in_the_recorded_session() {
@@ -2558,6 +2671,7 @@ test_reclaim_refuses_an_unreadable_endpoint
 test_herdr_relaunch_resumes_only_the_registered_pi_session
 test_herdr_reclaim_adopts_a_pane_that_outlived_its_server
 test_herdr_exit_reports_already_stopped_when_the_pane_outlived_its_server
+test_herdr_claude_exit_and_relaunch_stop_behind_the_slash_command_popup
 test_herdr_rebind_stays_in_the_recorded_session
 test_herdr_reclaim_refuses_an_agent_that_came_back
 test_herdr_reclaim_keeps_the_task_whole
