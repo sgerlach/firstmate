@@ -1264,6 +1264,66 @@ FM_HERDR_SUBMIT_CONFIRM_LIVE=1 tests/fm-herdr-submit-confirm-live-e2e.test.sh
 ok - live Herdr submit confirm: Claude Code (2.1.283 (Claude Code)) on herdr 0.9.0 proves and submits a typed /exit behind its command popup
 ```
 
+Refreshed 2026-09-27 on Herdr 0.9.1 with Claude Code 2.1.283:
+
+```text
+ok - live Herdr submit confirm: Claude Code (2.1.283 (Claude Code)) on herdr 0.9.1 proves and submits a typed /exit behind its command popup
+```
+
+### Claude lifecycle control
+
+Measured 2026-09-27 against Herdr 0.9.1 and Claude Code 2.1.283 in an isolated `fm-lab-` session, through `bin/fm-control.sh` itself rather than the submit core alone.
+
+Before the viewport capture above, a live idle Claude on Herdr could not be stopped by either lifecycle verb.
+`bin/fm-control.sh <id> exit` and `bin/fm-control.sh <id> relaunch` both typed `/exit`, read an empty composer from the 20-row tail, pressed Ctrl+U, and never pressed Enter.
+At that moment the visible viewport showed `❯ /exit` with 22 rows below it: the closing rule, one notice row, and 20 popup rows.
+
+```text
+error: the exit command could not be sent to task labclaude on herdr
+error: relaunch of labclaude failed while stopping the old agent, which is still running; its original instructions were restored
+```
+
+The same pane accepted an ordinary steer through the same submit core, because a payload without a leading `/` opens no popup.
+On the same pre-fix code, an idle Pi 0.87.1 worker stopped through `/quit` typed behind Pi's own command popup, because only a Claude pane runs the payload proof.
+With the pre-fix code and only `FM_COMPOSER_CAPTURE_LINES=60` changed, the same exit reported `stopped`, which isolates the bounded read as the cause.
+With the viewport capture, `exit`, `relaunch`, and `relaunch --model sonnet` all succeed, and the replacement runs with `--model sonnet` in its process argv.
+
+Portable regression (fails against the bounded-tail reads with the error above):
+
+```sh
+tests/fm-control-relaunch.test.sh
+```
+
+```text
+ok - fm-control: relaunch and exit stop a live Claude on herdr behind its slash-command popup
+```
+
+Live guard, which spends model tokens on two one-line replies and is the command that refreshes this record:
+
+```sh
+FM_CONTROL_CLAUDE_HERDR_LIVE=1 tests/fm-control-claude-herdr-live-e2e.test.sh
+```
+
+```text
+ok - live control: Claude Code (2.1.283 (Claude Code)) on herdr 0.9.1 relaunches a worker into an agent-free pane
+ok - live control: Claude Code (2.1.283 (Claude Code)) on herdr 0.9.1 relaunch --model sonnet stops the live idle worker and runs the replacement on that model
+ok - live control: Claude Code (2.1.283 (Claude Code)) on herdr 0.9.1 exit stops the worker and keeps its endpoint and local copy
+```
+
+Refreshed 2026-10-02 on Herdr 0.9.1 with Claude Code 2.1.287:
+
+```text
+ok - live control: Claude Code (2.1.287 (Claude Code)) on herdr 0.9.1 relaunches a worker into an agent-free pane
+ok - live control: Claude Code (2.1.287 (Claude Code)) on herdr 0.9.1 relaunch --model sonnet stops the live idle worker and runs the replacement on that model
+ok - live control: Claude Code (2.1.287 (Claude Code)) on herdr 0.9.1 exit stops the worker and keeps its endpoint and local copy
+```
+
+Run against the pre-fix `bin/`, the same guard passes its first step and fails its second with the reported error:
+
+```text
+not ok - Claude Code (2.1.283 (Claude Code)) on herdr 0.9.1: relaunch --model sonnet could not replace a live idle worker: error: the exit command could not be sent to task clctl53273x20647 on herdr
+```
+
 ### Claude background-task exit picker
 
 Measured 2026-10-05 against Claude Code 2.1.289 in an isolated tmux session.
