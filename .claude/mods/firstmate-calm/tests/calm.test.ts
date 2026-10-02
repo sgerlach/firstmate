@@ -11,8 +11,10 @@ import {
   isStock,
   operational,
   PREFERENCE,
+  rasterOf,
   spinner,
   toolGroup,
+  toolProgress,
   toolResult,
   toolUse,
   userMessage,
@@ -22,9 +24,11 @@ import {
 const sessionStart = { cwd: "/work", surface: "terminal" as const, isInteractive: true };
 
 describe("activation", () => {
-  async function expectInert($: Engine, on: Parameters<typeof world>[0], functionHooks: string | undefined) {
+  // Loading the mod is the activation: no environment variable gates it, so the retired
+  // early-access opt-in changes nothing whether it is absent, off, or on.
+  async function expectActive($: Engine, on: Parameters<typeof world>[0], env: Record<string, string>) {
     const { clock, files, journal } = world(on, {
-      functionHooks,
+      env,
       preference: "on\n",
       messages: [{ role: "assistant", text: "Working", toolUses: [{ name: "Bash" }] }],
     });
@@ -33,32 +37,30 @@ describe("activation", () => {
       '{"seq":1,"epoch":0,"task":"fm-x","wake":"","verdict":"captain","summary":"PR ready","silent":false}\n',
     );
     await $.session.start(sessionStart);
-    const drawings = await Promise.all([
-      $.ui.render(spinner()),
-      $.ui.render(toolUse()),
-      $.ui.render(toolResult()),
-      $.ui.render(toolGroup()),
-      $.ui.render(userMessage(operational("watcher", "signal: x"))),
-      $.ui.render(assistantMessage("Working")),
-    ]);
-    expect(drawings.every(isStock)).toBe(true);
-    await clock.advance(220 * 16);
-    expect(journal.commands).toHaveLength(0);
-    expect(journal.blits).toHaveLength(0);
-    expect(journal.invalidations).toHaveLength(0);
-    expect(journal.toasts).toHaveLength(0);
-    expect(journal.fsReads).toHaveLength(0);
-    expect(journal.logs).toHaveLength(0);
-    expect(journal.sessionMessageReads).toBe(0);
-    expect(journal.configLists).toBe(0);
+    expect(journal.commands).toEqual(["calm"]);
+    expect(journal.logs).toEqual(["⚓ [seq 1] fm-x: PR ready"]);
+    expect(rasterOf(await $.ui.render(spinner()))).toBeDefined();
+    expect(isHidden(await $.ui.render(toolUse()))).toBe(true);
+    expect(isHidden(await $.ui.render(toolResult()))).toBe(true);
+    expect(isHidden(await $.ui.render(toolGroup()))).toBe(true);
+    expect(isHidden(await $.ui.render(toolProgress()))).toBe(true);
+    expect(isHidden(await $.ui.render(userMessage(operational("watcher", "signal: x"))))).toBe(true);
+    expect(isHidden(await $.ui.render(assistantMessage("Working")))).toBe(true);
+    expect(isStock(await $.ui.render(userMessage("a genuine prompt")))).toBe(true);
+    await clock.advance(220 * 4);
+    expect(journal.blits.length).toBeGreaterThan(0);
   }
 
-  test("is fully inert when the function-hooks opt-in is absent", async ($, on) => {
-    await expectInert($, on, undefined);
+  test("is active once loaded, with no environment opt-in at all", async ($, on) => {
+    await expectActive($, on, {});
   });
 
-  test("is fully inert when the function-hooks opt-in is not exactly one", async ($, on) => {
-    await expectInert($, on, "true");
+  test("ignores the retired CLAUDE_CODE_ENABLE_FUNCTION_HOOKS opt-in when it is off", async ($, on) => {
+    await expectActive($, on, { CLAUDE_CODE_ENABLE_FUNCTION_HOOKS: "0" });
+  });
+
+  test("ignores the retired CLAUDE_CODE_ENABLE_FUNCTION_HOOKS opt-in when it is on", async ($, on) => {
+    await expectActive($, on, { CLAUDE_CODE_ENABLE_FUNCTION_HOOKS: "1" });
   });
 
   test("registers /calm at session start and stays a pass-through while off", async ($, on) => {
@@ -69,6 +71,7 @@ describe("activation", () => {
     expect(isStock(await $.ui.render(toolUse()))).toBe(true);
     expect(isStock(await $.ui.render(toolResult()))).toBe(true);
     expect(isStock(await $.ui.render(toolGroup()))).toBe(true);
+    expect(isStock(await $.ui.render(toolProgress()))).toBe(true);
     expect(isStock(await $.ui.render(userMessage(operational("watcher", "signal: x"))))).toBe(true);
     expect(isStock(await $.ui.render(assistantMessage("hello")))).toBe(true);
     await clock.advance(220 * 8);
@@ -106,6 +109,7 @@ describe("/calm", () => {
     expect(isHidden(await $.ui.render(toolUse()))).toBe(true);
     expect(isHidden(await $.ui.render(toolResult()))).toBe(true);
     expect(isHidden(await $.ui.render(toolGroup("g", true)))).toBe(true);
+    expect(isHidden(await $.ui.render(toolProgress()))).toBe(true);
   });
 
   test("toggles off: persists off and restores the engine's drawings", async ($, on) => {
@@ -116,6 +120,7 @@ describe("/calm", () => {
     expect(files.get(PREFERENCE)).toBe("off\n");
     expect(journal.toasts).toEqual(["Calm off"]);
     expect(isStock(await $.ui.render(toolUse()))).toBe(true);
+    expect(isStock(await $.ui.render(toolProgress()))).toBe(true);
     expect(isStock(await $.ui.render(spinner()))).toBe(true);
   });
 

@@ -1,9 +1,8 @@
 // Firstmate Calm for Claude Code: the hooks module of the Calm mod, whose plugin name is `fm`.
 //
-// A Claude Code "mod" is a plugin whose behavior lives in one hooks module. Claude Code
-// may load this module through its rollout flag or `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS`,
-// but every handler requires that environment variable to equal `1`, so rollout-only
-// loading remains a complete no-op.
+// A Claude Code "mod" is a plugin whose behavior lives in one hooks module. Loading the
+// module is the activation: Claude Code loads it from the trusted project's
+// `.claude/skills/firstmate-calm` entry, and no environment variable gates it.
 // The plugin carries no command, skill, agent, or classic hook of its own; the `/calm`
 // command below exists only once this module has registered it. docs/calm.md owns the
 // captain-facing contract and docs/calm-mode-feasibility.md the version-scoped evidence.
@@ -17,8 +16,8 @@
 //
 // Presentation while Calm is on, sharing Pi Calm's goals where the mods API allows:
 // the stock working row (`Spinner`) becomes the two-row sailboat, repainted through
-// `$.ui.blit` on the sprite's own tick; `ToolUse`, `ToolResult`, and `ToolGroup` rows
-// draw as zero-height boxes; a `UserMessage` whose text the canonical operational-input
+// `$.ui.blit` on the sprite's own tick; `ToolUse`, `ToolResult`, `ToolGroup`, and
+// `ToolProgress` rows draw as zero-height boxes; a `UserMessage` whose text the canonical operational-input
 // classifier recognizes, or a record-backed doorbell whose record holds a current
 // envelope (read through `$.fs.read`, cached until Calm next invalidates its drawings),
 // draws as zero height; an `AssistantMessage` block recorded as a mid-turn working note
@@ -84,7 +83,6 @@ const CALM_COMMAND = "calm";
 // same as a new Pi extension lifetime.
 let calm = false;
 let preferencePath: string | undefined;
-let activation: Promise<boolean> | undefined;
 let loading: Promise<void> | undefined;
 let ticker: { cancel(): void } | undefined;
 const workingNotes = new Set<string>();
@@ -126,16 +124,6 @@ type NotesState = {
 let notes: NotesState | undefined;
 let notesTimer: { cancel(): void } | undefined;
 let notesPolling = false;
-
-function isActivated($: EngineInterface): Promise<boolean> {
-  if (activation === undefined) {
-    activation = $.env.get("CLAUDE_CODE_ENABLE_FUNCTION_HOOKS").then(
-      (value) => value === "1",
-      () => false,
-    );
-  }
-  return activation;
-}
 
 // A missing file is checked first because every rejected read or stat is an error in
 // Claude Code's debug log, and the supervision notes look for absent files every tick.
@@ -370,7 +358,6 @@ function hiddenRow($: EngineInterface, e: RenderInput): RenderElement {
 
 export const register: Register = (on) => {
   on("session.start", async ($, e, next) => {
-    if (!(await isActivated($))) return next(e);
     await resetSession($);
     // Notes that cannot start leave Calm and the transcript exactly as they were.
     await startNotes($).catch(() => undefined);
@@ -382,7 +369,6 @@ export const register: Register = (on) => {
   });
 
   on("command.run", { command: CALM_COMMAND }, async ($, e, next) => {
-    if (!(await isActivated($))) return next(e);
     await ensureLoaded($);
     const active = !calm;
     // Persist before changing live presentation, so a failed write leaves the current
@@ -404,7 +390,6 @@ export const register: Register = (on) => {
 
   // Follow a theme change: the next drawing and every later blit use the new family.
   on("config.set", { key: "theme" }, async ($, e, next) => {
-    if (!(await isActivated($))) return next(e);
     const result = await next(e);
     if (result.deny === undefined) {
       const chosen = CALM_SHIP_RASTER_PALETTES[calmShipPaletteFamily(result.value)];
@@ -419,11 +404,6 @@ export const register: Register = (on) => {
   // Record mid-turn narration as it streams: the text blocks of a model step that
   // stopped to call tools. Subagent steps never draw in the main transcript.
   on("turn.step", async function* ($, e, next) {
-    if (!(await isActivated($))) {
-      const untouched = next(e);
-      for await (const chunk of untouched) yield chunk;
-      return await untouched.result;
-    }
     const stream = next(e);
     const blocks = new Map<number, string>();
     for await (const chunk of stream) {
@@ -454,7 +434,6 @@ export const register: Register = (on) => {
   });
 
   on("ui.render", { component: "Spinner" }, async ($, e, next) => {
-    if (!(await isActivated($))) return next(e);
     await ensureLoaded($);
     if (!calm || e.surface !== "terminal") {
       sites.delete(e.requestId);
@@ -471,23 +450,24 @@ export const register: Register = (on) => {
   });
 
   on("ui.render", { component: "ToolUse" }, async ($, e, next) => {
-    if (!(await isActivated($))) return next(e);
     await ensureLoaded($);
     return calm ? hiddenRow($, e) : next(e);
   });
   on("ui.render", { component: "ToolResult" }, async ($, e, next) => {
-    if (!(await isActivated($))) return next(e);
     await ensureLoaded($);
     return calm ? hiddenRow($, e) : next(e);
   });
   on("ui.render", { component: "ToolGroup" }, async ($, e, next) => {
-    if (!(await isActivated($))) return next(e);
+    await ensureLoaded($);
+    return calm ? hiddenRow($, e) : next(e);
+  });
+  // The run-in-background pill under a running tool call belongs to the hidden tool row.
+  on("ui.render", { component: "ToolProgress" }, async ($, e, next) => {
     await ensureLoaded($);
     return calm ? hiddenRow($, e) : next(e);
   });
 
   on("ui.render", { component: "UserMessage" }, async ($, e, next) => {
-    if (!(await isActivated($))) return next(e);
     await ensureLoaded($);
     if (!calm) return next(e);
     const operational =
@@ -496,7 +476,6 @@ export const register: Register = (on) => {
   });
 
   on("ui.render", { component: "AssistantMessage" }, async ($, e, next) => {
-    if (!(await isActivated($))) return next(e);
     await ensureLoaded($);
     const key = workingNoteKey(e.props.text);
     return calm && workingNotes.has(key) && !finalReplies.has(key) ? hiddenRow($, e) : next(e);

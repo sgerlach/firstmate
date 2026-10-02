@@ -51,8 +51,6 @@ export type WorldOptions = {
   preference?: string;
   /** Extra environment beside FM_HOME; pass `{}` with `home: undefined` to unset FM_HOME. */
   env?: Record<string, string>;
-  /** Function-hooks opt-in value; omitted options default to the active value `1`. */
-  functionHooks?: string | undefined;
   /** The Firstmate home FM_HOME names; undefined leaves FM_HOME unset. */
   home?: string | undefined;
   /** What `$.session.messages()` answers. */
@@ -66,11 +64,9 @@ export const STOCK_TEXT = "STOCK-DRAWING";
 
 export function world(on: On, options: WorldOptions = {}): World {
   const home = "home" in options ? options.home : HOME;
-  const functionHooks = "functionHooks" in options ? options.functionHooks : "1";
   mock.env(on, {
     ...(home === undefined ? {} : { FM_HOME: home }),
     ...(options.env ?? {}),
-    ...(functionHooks === undefined ? {} : { CLAUDE_CODE_ENABLE_FUNCTION_HOOKS: functionHooks }),
   });
   const clock = mock.clock(on);
   mock.store(on);
@@ -105,7 +101,7 @@ export function world(on: On, options: WorldOptions = {}): World {
     let mtimeMs = 0;
     for (const char of text) mtimeMs = (mtimeMs * 31 + char.codePointAt(0)!) % 2147483647;
     mtimeMs = mtimes.get(e.path) ?? mtimeMs;
-    return { value: { kind: "file" as const, size: text.length, mtimeMs } };
+    return { value: { kind: "file" as const, size: text.length, mtimeMs, isLink: false } };
   });
   on("ui.log", async (_$, e) => {
     journal.logs.push(e.text);
@@ -129,7 +125,9 @@ export function world(on: On, options: WorldOptions = {}): World {
     return { value: undefined };
   });
   on("ui.blit", async (_$, e) => {
-    journal.blits.push({ requestId: e.requestId, key: e.key, columns: e.columns, rows: e.rows, cells: e.cells });
+    // The mod blits only Raster cells; an image `source` blit would journal no cells.
+    const cells = "cells" in e ? e.cells : "";
+    journal.blits.push({ requestId: e.requestId, key: e.key, columns: e.columns, rows: e.rows, cells });
     return { value: blitDenial === undefined ? {} : { deny: blitDenial } };
   });
   on("session.messages", async () => {
@@ -189,7 +187,7 @@ export function spinner(requestId = "agent-main", viewport: { columns: number; r
     component: "Spinner" as const,
     requestId,
     viewport,
-    props: { word: "Sauteing", message: null, mode: "requesting" as const },
+    props: { word: "Sauteing", message: null, suffix: "…", mode: "requesting" as const },
   };
 }
 
@@ -199,7 +197,7 @@ export function unmeasuredSpinner(requestId = "agent-main") {
     surface: "terminal" as const,
     component: "Spinner" as const,
     requestId,
-    props: { word: "Sauteing", message: null, mode: "requesting" as const },
+    props: { word: "Sauteing", message: null, suffix: "…", mode: "requesting" as const },
   };
 }
 
@@ -233,13 +231,24 @@ export function toolGroup(requestId = "group-1", isExpanded = false) {
   };
 }
 
+/** The run-in-background pill under a running tool call, as Claude Code 2.1.287 raises it. */
+export function toolProgress(requestId = "progress-1") {
+  return {
+    surface: "terminal" as const,
+    component: "ToolProgress" as const,
+    requestId,
+    viewport: VIEWPORT,
+    props: { tool_use_id: "tool-1", kind: "background_hint" as const, hint: "(ctrl+b to run in background)" },
+  };
+}
+
 export function userMessage(text: string, requestId = "user-1") {
   return {
     surface: "terminal" as const,
     component: "UserMessage" as const,
     requestId,
     viewport: VIEWPORT,
-    props: { text, origin: { kind: "composer" as const } },
+    props: { text, origin: { kind: "composer" as const }, isExpanded: false },
   };
 }
 

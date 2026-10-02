@@ -8,8 +8,9 @@
 # guard runs by default wherever `claude` is installed; the portable checks that need
 # no Claude Code binary live in tests/fm-calm-claude-mod.test.sh.
 #
-# The early-access function-hooks surface is default-off; the flag is set on this
-# test's own processes only and never written into any settings file.
+# No environment opt-in is set: loading the mod is its activation, so the retired
+# CLAUDE_CODE_ENABLE_FUNCTION_HOOKS is removed from this test's own processes, and the
+# scan must show the module never reads it.
 set -u
 
 # shellcheck source=tests/lib.sh
@@ -37,7 +38,7 @@ expect_in_report() {
 test_validate_strict() {
   local path report
   for path in "$MOD" "$AUTOLOAD_PATH"; do
-    if ! report=$(CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude plugin validate --strict "$path" 2>&1); then
+    if ! report=$(env -u CLAUDE_CODE_ENABLE_FUNCTION_HOOKS claude plugin validate --strict "$path" 2>&1); then
       printf '%s\n' "$report" >&2
       fail "Claude Code $CLAUDE_VERSION refused the Calm mod at $path under strict validation"
     fi
@@ -47,10 +48,11 @@ test_validate_strict() {
     expect_in_report "$report" "ui.render{component=ToolUse}" "the scan of $path does not hook tool rows"
     expect_in_report "$report" "ui.render{component=ToolResult}" "the scan of $path does not hook tool results"
     expect_in_report "$report" "ui.render{component=ToolGroup}" "the scan of $path does not hook tool groups"
+    expect_in_report "$report" "ui.render{component=ToolProgress}" "the scan of $path does not hook the tool-progress pill"
     expect_in_report "$report" "ui.render{component=UserMessage}" "the scan of $path does not hook user rows"
     expect_in_report "$report" "ui.render{component=AssistantMessage}" "the scan of $path does not hook assistant rows"
     expect_in_report "$report" "command.run{command=calm}" "the scan of $path does not serve /calm"
-    expect_in_report "$report" "env reads: CLAUDE_CODE_ENABLE_FUNCTION_HOOKS, FM_CONFIG_OVERRIDE, FM_HOME, FM_ROOT_OVERRIDE, FM_STATE_OVERRIDE" "the scan of $path reads a different environment"
+    expect_in_report "$report" "env reads: FM_CONFIG_OVERRIDE, FM_HOME, FM_ROOT_OVERRIDE, FM_STATE_OVERRIDE" "the scan of $path reads a different environment"
     expect_in_report "$report" "env writes: nothing" "the scan of $path writes the environment"
     expect_in_report "$report" '$.ui.log (via' "the scan of $path does not write supervision notes to the transcript"
     case "$report" in
@@ -65,7 +67,7 @@ test_validate_strict() {
 
 test_plugin_suites() {
   local report
-  if ! report=$(cd "$TMP_ROOT" && CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude plugin test "$MOD" 2>&1); then
+  if ! report=$(cd "$TMP_ROOT" && env -u CLAUDE_CODE_ENABLE_FUNCTION_HOOKS claude plugin test "$MOD" 2>&1); then
     printf '%s\n' "$report" >&2
     fail "Claude Code $CLAUDE_VERSION failed the Calm mod's plugin test suites"
   fi
@@ -77,7 +79,7 @@ test_plugin_suites() {
     printf '%s\n' "$report" >&2
     fail "Claude Code $CLAUDE_VERSION reported Calm mod plugin test failures"
   }
-  pass "Claude Code $CLAUDE_VERSION runs the Calm mod's plugin test suites clean: persisted toggle, hidden rows, working notes, the clock-driven working ship, and supervision notes"
+  pass "Claude Code $CLAUDE_VERSION runs the Calm mod's plugin test suites clean: activation with no environment opt-in, persisted toggle, hidden rows, working notes, the clock-driven working ship, and supervision notes"
 }
 
 test_validate_strict
