@@ -1,8 +1,9 @@
 // Firstmate Calm presentation policy for the Claude Code mod, kept free of the engine.
 //
 // This module owns the decisions ../hooks/register.ts applies through `$`: where the
-// shared per-home Calm preference lives and how its value reads, which assistant text is
-// a mid-turn working note, and which transcript rows Calm hides. It shares Pi Calm's
+// shared per-home Calm preference and the per-home working-scene setting live and how
+// their values read, which assistant text is a mid-turn working note, and which
+// transcript rows Calm hides. It shares Pi Calm's
 // broad presentation boundary: genuine user prompts, genuine agent responses, and
 // working activity stay visible; tool rows, tool groups, classified working notes, and
 // canonically classified operational user rows hide, including a record-backed doorbell
@@ -46,15 +47,39 @@ export function calmCodeRootFromPluginRoot(pluginRoot: string): string {
 }
 
 /**
- * The per-home `config/calm` path, resolved exactly as the Pi extension resolves it:
+ * The per-home config directory, resolved exactly as the Pi extension resolves it:
  * `FM_HOME`, then `FM_ROOT_OVERRIDE`, then the tracked code root, with
  * `FM_CONFIG_OVERRIDE` naming the config directory outright when present.
  */
-export function calmPreferencePath(env: CalmHomeEnvironment, pluginRoot: string): string {
-  const configDirectory =
+export function calmConfigDirectory(env: CalmHomeEnvironment, pluginRoot: string): string {
+  return (
     env.FM_CONFIG_OVERRIDE ||
-    `${env.FM_HOME || env.FM_ROOT_OVERRIDE || calmCodeRootFromPluginRoot(pluginRoot)}/config`;
-  return `${configDirectory}/calm`;
+    `${env.FM_HOME || env.FM_ROOT_OVERRIDE || calmCodeRootFromPluginRoot(pluginRoot)}/config`
+  );
+}
+
+/** The per-home `config/calm` path, the preference Pi's `/calm` shares. */
+export function calmPreferencePath(env: CalmHomeEnvironment, pluginRoot: string): string {
+  return `${calmConfigDirectory(env, pluginRoot)}/calm`;
+}
+
+/** The working-animation scenes the Claude Code mod can draw while Calm is on. */
+export type CalmScene = "ship" | "hawk";
+
+/** The scene drawn when `config/calm-scene` is absent or unrecognized: the sailboat. */
+export const CALM_DEFAULT_SCENE: CalmScene = "ship";
+
+/** The per-home `config/calm-scene` path, beside the preference. */
+export function calmScenePath(env: CalmHomeEnvironment, pluginRoot: string): string {
+  return `${calmConfigDirectory(env, pluginRoot)}/calm-scene`;
+}
+
+/**
+ * Which scene a stored setting selects: exactly `hawk` selects the hawk, and `ship`,
+ * an absent file, or any other value selects the default sailboat.
+ */
+export function parseCalmScene(stored: string | undefined): CalmScene {
+  return stored?.trim() === "hawk" ? "hawk" : CALM_DEFAULT_SCENE;
 }
 
 /**

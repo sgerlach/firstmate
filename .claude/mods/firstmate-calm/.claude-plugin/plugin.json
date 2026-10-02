@@ -1,7 +1,7 @@
 {
   "name": "fm",
   "version": "1.0.0",
-  "description": "Firstmate Calm for Claude Code: the sailboat working animation and conversation-only transcript presentation, sharing the per-home config/calm preference with the Pi Calm extension. Loading the mod is the activation; /calm toggles the shared preference.",
+  "description": "Firstmate Calm for Claude Code: the working animation (the sailboat, or the hawk when the per-home config/calm-scene setting selects it) and conversation-only transcript presentation, sharing the per-home config/calm preference with the Pi Calm extension. Loading the mod is the activation; /calm toggles the shared preference.",
   "author": {
     "name": "Firstmate",
     "url": "https://github.com/kunchenguid/firstmate"

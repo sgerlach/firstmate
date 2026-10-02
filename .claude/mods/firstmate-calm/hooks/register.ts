@@ -7,16 +7,19 @@
 // command below exists only once this module has registered it. docs/calm.md owns the
 // captain-facing contract and docs/calm-mode-feasibility.md the version-scoped evidence.
 //
-// This file is the only place the engine interface `$` is touched: the geometry lives
-// in ../lib/fm-calm-working-ship-sprite.ts (shared with the Pi extension), the Raster
-// packing in ../lib/fm-calm-ship-raster.ts, and every visibility decision in
-// ../lib/fm-calm-presentation.ts, so the policy is testable under Node and the engine
-// glue under `claude plugin test`. Nothing here rewrites a message: `ui.render` changes
-// drawings and leaves the stored transcript, model context, and session storage alone.
+// This file is the only place the engine interface `$` is touched: the ship's geometry
+// lives in ../lib/fm-calm-working-ship-sprite.ts (shared with the Pi extension), the
+// hawk's in ../lib/fm-calm-working-hawk-sprite.ts, the Raster packing in
+// ../lib/fm-calm-raster.ts with each scene's palette beside it, and every visibility
+// decision in ../lib/fm-calm-presentation.ts, so the policy is testable under Node and
+// the engine glue under `claude plugin test`. Nothing here rewrites a message:
+// `ui.render` changes drawings and leaves the stored transcript, model context, and
+// session storage alone.
 //
 // Presentation while Calm is on, sharing Pi Calm's goals where the mods API allows:
-// the stock working row (`Spinner`) becomes the two-row sailboat, repainted through
-// `$.ui.blit` on the sprite's own tick; `ToolUse`, `ToolResult`, `ToolGroup`, and
+// the stock working row (`Spinner`) becomes the two-row working scene, the sailboat by
+// default or the hawk when the per-home `config/calm-scene` setting selects it,
+// repainted through `$.ui.blit` on the scene's own tick; `ToolUse`, `ToolResult`, `ToolGroup`, and
 // `ToolProgress` rows draw as zero-height boxes; a `UserMessage` whose text the canonical operational-input
 // classifier recognizes, or a record-backed doorbell whose record holds a current
 // envelope (read through `$.fs.read`, cached until Calm next invalidates its drawings),
@@ -24,7 +27,9 @@
 // draws as zero height. Calm off returns every drawing to the
 // engine. A toggle invalidates every hooked drawing, so rows already on screen redraw.
 // The boat is painted in Claude Code's own theme colors: the family is read from the
-// `theme` setting at load and re-read when a `config.set` changes it.
+// `theme` setting at load and re-read when a `config.set` changes it. The hawk keeps
+// its basic terminal colors whatever the theme. The scene setting is read at load and
+// again each time `/calm` turns Calm on.
 //
 // Supervision notes, whether Calm is on or off, as Pi shows them regardless of Calm: a
 // slow timer follows the outcome store's display tail copy and the supervision host's
@@ -44,17 +49,22 @@ import {
   CALM_WORKING_SHIP_TICK_MS,
   createCalmWorkingShipSprite,
 } from "../lib/fm-calm-working-ship-sprite.ts";
+import { createCalmWorkingHawkSprite } from "../lib/fm-calm-working-hawk-sprite.ts";
+import { calmRasterColumns, packCalmRasterCells, type CalmRasterCells } from "../lib/fm-calm-raster.ts";
 import {
   CALM_SHIP_RASTER_KEY,
   CALM_SHIP_RASTER_PALETTES,
   calmShipPaletteFamily,
-  calmShipRasterColumns,
-  packCalmShipRasterCells,
   type CalmShipRasterPalette,
 } from "../lib/fm-calm-ship-raster.ts";
+import { CALM_HAWK_RASTER_KEY, CALM_HAWK_RASTER_PALETTE } from "../lib/fm-calm-hawk-raster.ts";
 import {
+  CALM_DEFAULT_SCENE,
   calmPreferencePath,
+  calmScenePath,
   parseCalmPreference,
+  parseCalmScene,
+  type CalmScene,
   classifyRestoredTranscript,
   recordIsOperational,
   serializeCalmPreference,
@@ -90,9 +100,13 @@ const finalReplies = new Set<string>();
 // Each doorbell's record verdict, by record path. Records are immutable once published
 // but pruned after seven days, so every invalidation drops the cache and rechecks.
 const doorbellVerdicts = new Map<string, Promise<boolean>>();
-const sprite = createCalmWorkingShipSprite();
+// Both scenes keep their own state for the session; `scene` names the one drawn.
+const ship = createCalmWorkingShipSprite();
+const hawk = createCalmWorkingHawkSprite();
+let scene: CalmScene = CALM_DEFAULT_SCENE;
+let scenePath: string | undefined;
 let palette: CalmShipRasterPalette = CALM_SHIP_RASTER_PALETTES.light;
-// Every Spinner site currently drawing the boat, by its requestId, with the mounted
+// Every Spinner site currently drawing the scene, by its requestId, with the mounted
 // Raster size a blit must repeat exactly.
 const sites = new Map<string, { columns: number; rows: number }>();
 /** How often the supervision notes check the store's tail copy and the host's latch. */
@@ -145,16 +159,21 @@ async function readTheme($: EngineInterface): Promise<unknown> {
   }
 }
 
+/** Re-read the per-home scene setting, the sailboat when it is absent or unrecognized. */
+async function loadScene($: EngineInterface): Promise<void> {
+  scene = parseCalmScene(scenePath === undefined ? undefined : await readText($, scenePath));
+}
+
 async function load($: EngineInterface): Promise<void> {
-  preferencePath = calmPreferencePath(
-    {
-      FM_HOME: await $.env.get("FM_HOME"),
-      FM_ROOT_OVERRIDE: await $.env.get("FM_ROOT_OVERRIDE"),
-      FM_CONFIG_OVERRIDE: await $.env.get("FM_CONFIG_OVERRIDE"),
-    },
-    $.plugin.root,
-  );
+  const home = {
+    FM_HOME: await $.env.get("FM_HOME"),
+    FM_ROOT_OVERRIDE: await $.env.get("FM_ROOT_OVERRIDE"),
+    FM_CONFIG_OVERRIDE: await $.env.get("FM_CONFIG_OVERRIDE"),
+  };
+  preferencePath = calmPreferencePath(home, $.plugin.root);
+  scenePath = calmScenePath(home, $.plugin.root);
   calm = parseCalmPreference(await readText($, preferencePath));
+  await loadScene($);
   palette = CALM_SHIP_RASTER_PALETTES[calmShipPaletteFamily(await readTheme($))];
   try {
     const restored = classifyRestoredTranscript(await $.session.messages());
@@ -165,7 +184,7 @@ async function load($: EngineInterface): Promise<void> {
   }
   if (ticker === undefined) {
     ticker = $.clock.every(CALM_WORKING_SHIP_TICK_MS, () => {
-      void repaintShip($);
+      void repaintScene($);
     });
   }
   invalidateDrawings($);
@@ -185,9 +204,30 @@ async function resetSession($: EngineInterface): Promise<void> {
   finalReplies.clear();
   doorbellVerdicts.clear();
   sites.clear();
-  sprite.reset();
+  ship.reset();
+  hawk.reset();
+  scene = CALM_DEFAULT_SCENE;
+  scenePath = undefined;
   palette = CALM_SHIP_RASTER_PALETTES.light;
   await ensureLoaded($);
+}
+
+/** The Raster key the active scene draws under. */
+function sceneRasterKey(): string {
+  return scene === "hawk" ? CALM_HAWK_RASTER_KEY : CALM_SHIP_RASTER_KEY;
+}
+
+/** Advance the active scene one tick. */
+function tickScene(): void {
+  if (scene === "hawk") hawk.tick();
+  else ship.tick();
+}
+
+/** The active scene's next frame, packed for a Raster of `columns`, in its own palette. */
+function sceneCells(columns: number): CalmRasterCells {
+  return scene === "hawk"
+    ? packCalmRasterCells(hawk.frame(columns), columns, CALM_HAWK_RASTER_PALETTE)
+    : packCalmRasterCells(ship.frame(columns), columns, palette);
 }
 
 /** Redraw every hooked drawing, rechecking each doorbell's record on its next drawing. */
@@ -196,15 +236,15 @@ function invalidateDrawings($: EngineInterface): void {
   $.ui.invalidate("ui.render");
 }
 
-/** One scheduler tick: advance the sprite, then repaint every mounted boat in place. */
-async function repaintShip($: EngineInterface): Promise<void> {
+/** One scheduler tick: advance the scene, then repaint every mounted site in place. */
+async function repaintScene($: EngineInterface): Promise<void> {
   if (!calm || sites.size === 0) return;
-  sprite.tick();
+  tickScene();
   for (const [requestId, site] of sites) {
-    const packed = packCalmShipRasterCells(sprite.frame(site.columns), site.columns, palette);
+    const packed = sceneCells(site.columns);
     const result = await $.ui.blit({
       requestId,
-      key: CALM_SHIP_RASTER_KEY,
+      key: sceneRasterKey(),
       cells: packed.cells,
       columns: site.columns,
       rows: site.rows,
@@ -363,7 +403,7 @@ export const register: Register = (on) => {
     await startNotes($).catch(() => undefined);
     await $.command.register({
       name: CALM_COMMAND,
-      description: "Toggle Firstmate's Calm transcript presentation and working ship.",
+      description: "Toggle Firstmate's Calm transcript presentation and working animation.",
     });
     return next(e);
   });
@@ -381,21 +421,24 @@ export const register: Register = (on) => {
       return {};
     }
     calm = active;
-    if (!calm) sites.clear();
+    // Turning on re-reads the scene setting, so an edited choice shows without a restart.
+    if (calm) await loadScene($);
+    else sites.clear();
     invalidateDrawings($);
     $.ui.toast(active ? "Calm on" : "Calm off");
     // No `text`: the toggle leaves no output row in the transcript, as on Pi.
     return {};
   });
 
-  // Follow a theme change: the next drawing and every later blit use the new family.
+  // Follow a theme change: the next ship drawing and every later blit use the new
+  // family. The hawk's basic colors never follow the theme, so it redraws nothing.
   on("config.set", { key: "theme" }, async ($, e, next) => {
     const result = await next(e);
     if (result.deny === undefined) {
       const chosen = CALM_SHIP_RASTER_PALETTES[calmShipPaletteFamily(result.value)];
       if (chosen !== palette) {
         palette = chosen;
-        if (calm) invalidateDrawings($);
+        if (calm && scene === "ship") invalidateDrawings($);
       }
     }
     return result;
@@ -439,13 +482,13 @@ export const register: Register = (on) => {
       sites.delete(e.requestId);
       return next(e);
     }
-    const columns = calmShipRasterColumns(e.viewport?.columns);
-    const packed = packCalmShipRasterCells(sprite.frame(columns), columns, palette);
+    const columns = calmRasterColumns(e.viewport?.columns);
+    const packed = sceneCells(columns);
     sites.set(e.requestId, { columns, rows: packed.rows });
     const { Box, Raster } = $.ui.resolve(e);
     return Box({
       flexDirection: "column",
-      children: Raster({ key: CALM_SHIP_RASTER_KEY, columns, rows: packed.rows, cells: packed.cells }),
+      children: Raster({ key: sceneRasterKey(), columns, rows: packed.rows, cells: packed.cells }),
     });
   });
 

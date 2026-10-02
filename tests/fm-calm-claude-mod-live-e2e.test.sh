@@ -18,6 +18,10 @@
 #      writes: the session-start replay, new sailboat and anchor lines, and the latch
 #      note, each behind the plugin's `fm:` label, without moving a store marker or
 #      reaching any model request, and a resume shows each anchor once.
+#   5. With the per-home config/calm-scene setting at `hawk` and Calm on, the hawk
+#      replaces the working row instead of the sailboat: the engine accepts the scene's
+#      glyphs, the bird changes pose and moves, the land strip scrolls, and the scene
+#      leaves with the working row, while the preference stays untouched.
 # Everything is isolated: a temporary CLAUDE_CONFIG_DIR, project, and FM_HOME, a private
 # tmux socket, and tests/assets/fm-claude-scripted-messages-api.py as the model, so no
 # credential is read, no model token is spent, and nothing under ~/.claude changes.
@@ -46,6 +50,11 @@ SOCKET="fm-calm-claude-$$"
 SESSION="fm-calm-claude-e2e"
 HULL='╲▁▁▁╱'
 SAIL='◿│◣'
+# The hawk's three wing poses and a land glyph only its strip draws.
+WINGS_UP='╲v╱'
+WINGS_GLIDE='─v─'
+WINGS_DOWN='╱v╲'
+PINE='↟'
 PILL='to run in background'
 NARRATION='Let me read the notes.'
 # A dummy key the scripted model accepts; only its last 20 characters are recorded as approved.
@@ -228,6 +237,27 @@ hull_column() {  # <screen text>
   printf '%s\n' "$1" | awk -v hull="$HULL" 'index($0, hull) { print index($0, hull); exit }'
 }
 
+# The hawk's wing pose on screen, or nothing when no bird is drawn.
+bird_pose() {  # <screen text>
+  case "$1" in
+    *"$WINGS_UP"*) printf '%s\n' "$WINGS_UP" ;;
+    *"$WINGS_GLIDE"*) printf '%s\n' "$WINGS_GLIDE" ;;
+    *"$WINGS_DOWN"*) printf '%s\n' "$WINGS_DOWN" ;;
+  esac
+}
+
+bird_column() {  # <screen text>
+  printf '%s\n' "$1" | awk -v up="$WINGS_UP" -v glide="$WINGS_GLIDE" -v down="$WINGS_DOWN" '
+    index($0, up) { print index($0, up); exit }
+    index($0, glide) { print index($0, glide); exit }
+    index($0, down) { print index($0, down); exit }'
+}
+
+# The land row: the one screen line that draws the strip's pines.
+land_row() {  # <screen text>
+  printf '%s\n' "$1" | grep -F "$PINE" | head -1
+}
+
 # The scripted model answers this prompt with a narrated `sleep 8; cat notes.txt` Bash
 # call and then a reply naming words that live only in notes.txt, so the settled turn is
 # told apart from the echoed prompt by "gamma" on screen with no working row left.
@@ -241,8 +271,8 @@ working_row_shown() {  # <screen text>
   return 1
 }
 
-# Wait until the turn has settled: the answer is on screen and no working row or
-# boat remains.
+# Wait until the turn has settled: the answer is on screen and no working row, boat,
+# or bird remains.
 wait_settled() {  # <what> [iterations]
   local what=$1 limit=${2:-600} i=0 shot
   while [ "$i" -lt "$limit" ]; do
@@ -255,7 +285,7 @@ wait_settled() {  # <what> [iterations]
       *'gamma'*)
         if ! working_row_shown "$shot"; then
           case "$shot" in
-            *"$HULL"*) ;;
+            *"$HULL"*|*"$WINGS_UP"*|*"$WINGS_GLIDE"*|*"$WINGS_DOWN"*) ;;
             *) return 0 ;;
           esac
         fi
@@ -602,3 +632,94 @@ resumed_notes=$(screen)
 }
 quit_session
 pass "Claude Code $CLAUDE_VERSION with Calm off shows the supervision notes: the session-start anchor for an unprocessed captain outcome, a sailboat for a new routine outcome, an anchor for a new captain outcome, and the latch-trip note, each behind the fm: label, skipping processed and silent outcomes, moving no store marker, reaching no model request, and on resume showing each anchor once"
+
+# --- 5. The hawk scene: config/calm-scene replaces the sailboat with the hawk -------
+DEBUG_LOG_HAWK="$LAB/debug-hawk.log"
+printf 'on\n' >"$FM_HOME_DIR/config/calm"
+printf 'hawk\n' >"$FM_HOME_DIR/config/calm-scene"
+launch "$DEBUG_LOG_HAWK" ''
+wait_idle
+wait_module_loaded "$DEBUG_LOG_HAWK" 'with the hawk scene selected'
+send "$PROMPT"
+enter
+wait_screen "$PINE" 'the hawk scene during a real turn' 200
+# Sample every frame until the turn settles: the bird in some pose over the land, never
+# the sailboat, the stock working row, or a tool row; the poses, bird columns, and land
+# rows seen prove the wings, the flight, and the scroll each changed on screen.
+poses_seen=''
+bird_columns=''
+land_rows=''
+i=0
+while [ "$i" -lt 600 ]; do
+  hawk_frame=$(screen)
+  case "$hawk_frame" in
+    *'CLAUDE_EXIT='*)
+      printf '%s\n' "$hawk_frame" >&2
+      fail "Claude Code $CLAUDE_VERSION exited during the hawk turn"
+      ;;
+    *"$HULL"*|*"$SAIL"*)
+      printf '%s\n' "$hawk_frame" >&2
+      fail "the sailboat drew although config/calm-scene selects the hawk"
+      ;;
+    *"$PILL"*|*'shell command'*|*'sleep 8; cat notes.txt'*)
+      printf '%s\n' "$hawk_frame" >&2
+      fail "a tool row or the run-in-background pill drew while Calm was on with the hawk scene"
+      ;;
+  esac
+  if working_row_shown "$hawk_frame"; then
+    printf '%s\n' "$hawk_frame" >&2
+    fail "the stock working row drew while Calm was on with the hawk scene"
+  fi
+  pose=$(bird_pose "$hawk_frame")
+  if [ -n "$pose" ]; then
+    case "$poses_seen" in
+      *"$pose"*) ;;
+      *) poses_seen="$poses_seen$pose " ;;
+    esac
+    column=$(bird_column "$hawk_frame")
+    case " $bird_columns " in
+      *" $column "*) ;;
+      *) bird_columns="$bird_columns $column" ;;
+    esac
+    land=$(land_row "$hawk_frame")
+    case "$land_rows" in
+      *"$land"*) ;;
+      *) land_rows="$land_rows$land"$'\n' ;;
+    esac
+  fi
+  [ "$(replies_shown "$hawk_frame")" -ge 1 ] && [ -z "$pose" ] && [ -n "$poses_seen" ] && break
+  sleep 0.1
+  i=$((i + 1))
+done
+case "$poses_seen" in
+  *"$WINGS_GLIDE"*) : ;;
+  *) fail "the hawk never glided (poses seen: $poses_seen)" ;;
+esac
+case "$poses_seen" in
+  *"$WINGS_UP"*|*"$WINGS_DOWN"*) : ;;
+  *) fail "the hawk never flapped (poses seen: $poses_seen)" ;;
+esac
+[ "$(printf '%s' "$bird_columns" | wc -w)" -ge 2 ] || fail "the hawk never moved (columns seen:$bird_columns)"
+[ "$(printf '%s' "$land_rows" | grep -c .)" -ge 2 ] || fail "the land never scrolled under the hawk"
+case "$land_rows" in
+  *'╱╲'*) : ;;
+  *) fail "the land drew no mountain" ;;
+esac
+case "$land_rows" in
+  *'▁'*) : ;;
+  *) fail "the land drew no meadow" ;;
+esac
+# A refused tree makes the engine draw its own working row and log why; the scene's
+# glyphs must all be cells the Raster accepts.
+if grep -E 'does not validate|refused' "$DEBUG_LOG_HAWK" >&2; then
+  fail "Claude Code $CLAUDE_VERSION refused a hawk scene drawing"
+fi
+wait_settled 'the turn with the hawk scene'
+hawk_settled=$(screen)
+case "$hawk_settled" in
+  *"$PINE"*|*"$WINGS_UP"*|*"$WINGS_GLIDE"*|*"$WINGS_DOWN"*) fail "the hawk scene stayed on screen after the turn settled" ;;
+esac
+[ "$(cat "$FM_HOME_DIR/config/calm")" = on ] || fail "the hawk scene changed the Calm preference"
+[ "$(cat "$FM_HOME_DIR/config/calm-scene")" = hawk ] || fail "the session changed the scene setting"
+quit_session
+pass "Claude Code $CLAUDE_VERSION with config/calm-scene at hawk draws the hawk in the working row instead of the sailboat: the engine accepts its glyphs, the bird glides and flaps and moves, the land strip scrolls beneath it, and the scene leaves with the working row while the shared preference stays on"

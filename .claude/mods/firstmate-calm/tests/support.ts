@@ -10,6 +10,7 @@ import { mock, type MockClock } from "claude-code/testing";
 
 export const HOME = "/fm/home";
 export const PREFERENCE = `${HOME}/config/calm`;
+export const SCENE = `${HOME}/config/calm-scene`;
 
 export type Journal = {
   /** Every `$.command.register` name, in order. */
@@ -49,6 +50,8 @@ export type World = {
 export type WorldOptions = {
   /** The stored preference text; absent means no file. */
   preference?: string;
+  /** The stored working-scene setting text; absent means no file, so the sailboat draws. */
+  scene?: string;
   /** Extra environment beside FM_HOME; pass `{}` with `home: undefined` to unset FM_HOME. */
   env?: Record<string, string>;
   /** The Firstmate home FM_HOME names; undefined leaves FM_HOME unset. */
@@ -74,6 +77,7 @@ export function world(on: On, options: WorldOptions = {}): World {
   const files = new Map<string, string>();
   const mtimes = new Map<string, number>();
   if (options.preference !== undefined) files.set(PREFERENCE, options.preference);
+  if (options.scene !== undefined) files.set(SCENE, options.scene);
   const journal: Journal = {
     commands: [],
     toasts: [],

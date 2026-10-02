@@ -7,8 +7,10 @@
 #   - the harness-neutral sprite core both harnesses share: the Pi widget's rendering
 #     is byte-for-byte the shared frame painted with standard ANSI codes, so extracting
 #     the core changed nothing Pi draws;
-#   - the Raster packing of that frame and its base64 encoder;
-#   - the pure presentation policy: home resolution, preference values, working notes;
+#   - the harness-neutral hawk scene core: its wing cycle, bird and land cadences, edge
+#     reversal, repeating land strip, color classes, and freeze/resume state;
+#   - the Raster packing of either scene's frame, each scene's palette, and the base64 encoder;
+#   - the pure presentation policy: home resolution, preference and scene values, working notes;
 #   - the pure supervision-note lines over a tail copy bin/fm-branch-outcome.sh writes;
 #   - the operational-input classifier's parity with bin/fm-operational-input.sh over
 #     envelopes the shell owner itself encodes, its legacy shapes, and near misses, and
@@ -159,8 +161,11 @@ test_raster_packing() {
   cat >"$TMP_ROOT/raster.mjs" <<JS
 import { pathToFileURL } from "node:url";
 import { randomBytes } from "node:crypto";
-const raster = await import(pathToFileURL($(js_string "$MOD") + "/lib/fm-calm-ship-raster.ts").href);
+const raster = await import(pathToFileURL($(js_string "$MOD") + "/lib/fm-calm-raster.ts").href);
+const shipRaster = await import(pathToFileURL($(js_string "$MOD") + "/lib/fm-calm-ship-raster.ts").href);
+const hawkRaster = await import(pathToFileURL($(js_string "$MOD") + "/lib/fm-calm-hawk-raster.ts").href);
 const core = await import(pathToFileURL($(js_string "$MOD") + "/lib/fm-calm-working-ship-sprite.ts").href);
+const hawkCore = await import(pathToFileURL($(js_string "$MOD") + "/lib/fm-calm-working-hawk-sprite.ts").href);
 const check = (condition, message) => { if (!condition) throw new Error(message); };
 for (let length = 0; length <= 80; length += 1) {
   const bytes = new Uint8Array(randomBytes(length));
@@ -181,18 +186,30 @@ const decode = (cells, columns, rows) => {
   return grid;
 };
 // Claude Code's own theme tables: spinner blue water per family, Claude orange boat.
-const palettes = raster.CALM_SHIP_RASTER_PALETTES;
+const palettes = shipRaster.CALM_SHIP_RASTER_PALETTES;
 check(palettes.dark.water === 0x93a5ff && palettes.dark.boat === 0xd77757, "dark palette is not Claude Code's dark spinner blue and Claude orange");
 check(palettes.light.water === 0x5769f7 && palettes.light.boat === 0xd77757, "light palette is not Claude Code's light spinner blue and Claude orange");
-check(palettes.dark.plain === raster.CALM_SHIP_RASTER_DEFAULT_COLOR && palettes.light.plain === raster.CALM_SHIP_RASTER_DEFAULT_COLOR, "plain padding is not the terminal default");
+check(palettes.dark.plain === raster.CALM_RASTER_DEFAULT_COLOR && palettes.light.plain === raster.CALM_RASTER_DEFAULT_COLOR, "plain padding is not the terminal default");
 for (const [theme, family] of [["dark", "dark"], ["dark-ansi", "dark"], ["dark-daltonized", "dark"], ["light", "light"], ["light-ansi", "light"], ["light-daltonized", "light"], ["auto", "light"], ["custom:rose", "light"], [undefined, "light"], [42, "light"], ["", "light"]]) {
-  check(raster.calmShipPaletteFamily(theme) === family, \`theme \${JSON.stringify(theme)} chose \${raster.calmShipPaletteFamily(theme)}, not \${family}\`);
+  check(shipRaster.calmShipPaletteFamily(theme) === family, \`theme \${JSON.stringify(theme)} chose \${shipRaster.calmShipPaletteFamily(theme)}, not \${family}\`);
 }
-for (const [family, colors] of Object.entries(palettes)) for (const width of [1, 2, 3, 4, 5, 20, 77, 512]) {
-  const sprite = core.createCalmWorkingShipSprite();
+// The hawk's one theme-independent palette: xterm's RGB for the standard ANSI yellow
+// bird, blue mountains, and green pines and meadow, with default-colored padding.
+const hawkPalette = hawkRaster.CALM_HAWK_RASTER_PALETTE;
+check(hawkPalette.bird === 0xcdcd00, "the bird is not standard ANSI yellow");
+check(hawkPalette.mountain === 0x0000ee, "the mountains are not standard ANSI blue");
+check(hawkPalette.pine === 0x00cd00 && hawkPalette.meadow === 0x00cd00, "the pines and meadow are not standard ANSI green");
+check(hawkPalette.plain === raster.CALM_RASTER_DEFAULT_COLOR, "the hawk's padding is not the terminal default");
+check(shipRaster.CALM_SHIP_RASTER_KEY !== hawkRaster.CALM_HAWK_RASTER_KEY, "both scenes blit under one Raster key");
+const scenes = [
+  ...Object.entries(palettes).map(([family, colors]) => [\`ship/\${family}\`, colors, () => core.createCalmWorkingShipSprite()]),
+  ["hawk", hawkPalette, () => hawkCore.createCalmWorkingHawkSprite()],
+];
+for (const [family, colors, create] of scenes) for (const width of [1, 2, 3, 4, 5, 20, 77, 512]) {
+  const sprite = create();
   for (let step = 0; step < 6; step += 1) {
     const frame = sprite.frame(width);
-    const packed = raster.packCalmShipRasterCells(frame, width, colors);
+    const packed = raster.packCalmRasterCells(frame, width, colors);
     check(packed.rows === frame.length, \`rows \${packed.rows} for a \${frame.length}-row frame\`);
     const grid = decode(packed.cells, width, packed.rows);
     for (let row = 0; row < frame.length; row += 1) {
@@ -208,34 +225,139 @@ for (const [family, colors] of Object.entries(palettes)) for (const width of [1,
       for (; column < width; column += 1) {
         check(grid[row][column].glyph === " " && grid[row][column].fg === colors.plain, \`padding at \${row},\${column} is not a plain space\`);
       }
-      check(grid[row].every((cell) => cell.bg === raster.CALM_SHIP_RASTER_DEFAULT_COLOR), "a background was set");
+      check(grid[row].every((cell) => cell.bg === raster.CALM_RASTER_DEFAULT_COLOR), "a background was set");
       check(grid[row].every((cell) => cell.glyph.codePointAt(0) <= 0xffff), "a glyph left the BMP");
     }
     sprite.tick();
   }
 }
-// The packer's pre-load default is the both-readable light fallback.
-{
-  const packed = raster.packCalmShipRasterCells([[{ text: "▁", color: "water" }]], 1);
-  check(decode(packed.cells, 1, 1)[0][0].fg === palettes.light.water, "the default packing palette is not the light fallback");
-}
 // A run wider than the grid is clipped, never wrapped into the next row.
 {
-  const packed = raster.packCalmShipRasterCells([[{ text: "▁▁▁▁▁▁▁▁", color: "water" }], [{ text: "◿│◣", color: "boat" }]], 4);
+  const packed = raster.packCalmRasterCells([[{ text: "▁▁▁▁▁▁▁▁", color: "water" }], [{ text: "◿│◣", color: "boat" }]], 4, palettes.light);
   check(packed.rows === 2, "clip changed the row count");
   const grid = decode(packed.cells, 4, 2);
   check(grid[0].map((c) => c.glyph).join("") === "▁▁▁▁" && grid[1].map((c) => c.glyph).join("") === "◿│◣ ", "clip wrapped or dropped cells");
 }
-check(raster.packCalmShipRasterCells([], 3).rows === 1, "an empty frame did not pack one blank row");
-check(raster.calmShipRasterColumns(undefined) === 78, "unmeasured viewport width");
-check(raster.calmShipRasterColumns(160) === 158, "measured viewport width");
-check(raster.calmShipRasterColumns(2) === 1 && raster.calmShipRasterColumns(-5) === 1, "narrow viewport floor");
-check(raster.calmShipRasterColumns(10000) === 512, "raster width ceiling");
+check(raster.packCalmRasterCells([], 3, palettes.light).rows === 1, "an empty frame did not pack one blank row");
+check(raster.calmRasterColumns(undefined) === 78, "unmeasured viewport width");
+check(raster.calmRasterColumns(160) === 158, "measured viewport width");
+check(raster.calmRasterColumns(2) === 1 && raster.calmRasterColumns(-5) === 1, "narrow viewport floor");
+check(raster.calmRasterColumns(10000) === 512, "raster width ceiling");
 console.log("raster-ok");
 JS
   out=$(run_node "$TMP_ROOT/raster.mjs" 2>&1) || fail "raster packing: $out"
   assert_contains "$out" "raster-ok" "the raster packing check did not complete"
-  pass "the Raster packing lays the shared frame out row-major in Claude Code's dark or light theme palette, using light as the both-readable fallback, with plain padding, default backgrounds, BMP glyphs, clipping, and a standard base64 encoding"
+  pass "the Raster packing lays either scene's frame out row-major, the ship in Claude Code's dark or light theme palette with light as the both-readable fallback and the hawk in its basic terminal colors, with plain padding, default backgrounds, BMP glyphs, clipping, and a standard base64 encoding"
+}
+
+test_hawk_sprite() {
+  local out
+  cat >"$TMP_ROOT/hawk.mjs" <<JS
+import { pathToFileURL } from "node:url";
+const hawk = await import(pathToFileURL($(js_string "$MOD") + "/lib/fm-calm-working-hawk-sprite.ts").href);
+const ship = await import(pathToFileURL($(js_string "$MOD") + "/lib/fm-calm-working-ship-sprite.ts").href);
+const check = (condition, message) => { if (!condition) throw new Error(message); };
+const same = (actual, expected, message) => check(JSON.stringify(actual) === JSON.stringify(expected), \`\${message}: \${JSON.stringify(actual)} vs \${JSON.stringify(expected)}\`);
+const cells = (row) => row.map((run) => run.text).join("");
+const UP = "╲v╱", GLIDE = "─v─", DOWN = "╱v╲";
+// The captain's design: 52 hand-drawn columns, two flaps of one pose per tick, then a
+// glide of about four seconds; the bird at the boat's speed, the land at half of it.
+const STRIP = "↟↟▁↟╱╲▁↟↟↟▁▁╱╲╱╲▁↟▁▁↟↟↟▁╱╲▁▁↟▁↟↟▁▁╱╲▁↟↟▁▁▁↟▁╱╲╱╲▁↟↟▁";
+const strip = Array.from(STRIP);
+const FLAP = [UP, GLIDE, DOWN, GLIDE, UP, GLIDE, DOWN];
+const GLIDE_TICKS = 18;
+const CYCLE = FLAP.length + GLIDE_TICKS;
+same(hawk.CALM_WORKING_HAWK_LAND_STRIP, STRIP, "the land strip is not the captain's drawing");
+same(hawk.CALM_WORKING_HAWK_LAND_COLUMNS, 52, "the land strip's column count");
+same(hawk.CALM_WORKING_HAWK_FLAP_POSES, FLAP, "the flap poses");
+same([hawk.CALM_WORKING_HAWK_GLIDE_TICKS, hawk.CALM_WORKING_HAWK_CYCLE_TICKS], [GLIDE_TICKS, CYCLE], "the glide and cycle lengths");
+check(hawk.CALM_WORKING_HAWK_TICK_MS === ship.CALM_WORKING_SHIP_TICK_MS, "the hawk does not share the Calm tick");
+check(hawk.CALM_WORKING_HAWK_GLIDE_TICKS * hawk.CALM_WORKING_HAWK_TICK_MS >= 3900 && hawk.CALM_WORKING_HAWK_GLIDE_TICKS * hawk.CALM_WORKING_HAWK_TICK_MS <= 4100, "the glide is not about four seconds");
+check(hawk.CALM_WORKING_HAWK_TICKS_PER_MOVE === ship.CALM_WORKING_SHIP_TICKS_PER_MOVE, "the bird does not fly at the boat's speed");
+check(hawk.CALM_WORKING_HAWK_TICKS_PER_LAND_MOVE === 2 * hawk.CALM_WORKING_HAWK_TICKS_PER_MOVE, "the land does not move at half the bird's speed");
+const poseAt = (ticks) => FLAP[ticks % CYCLE] ?? GLIDE;
+const landAt = (offset, width) => Array.from({ length: width }, (_, column) => strip[(((column + offset) % 52) + 52) % 52]).join("");
+// A wide track: the wing cycle, the bird's and land's cadences, and the land's leftward scroll.
+{
+  const sprite = hawk.createCalmWorkingHawkSprite();
+  for (let tick = 0; tick <= 2 * CYCLE; tick += 1) {
+    const frame = sprite.frame(80);
+    check(frame.length === 2, \`tick \${tick} did not paint two rows\`);
+    const birdColumn = Math.floor(tick / 4);
+    const landOffset = Math.floor(tick / 8);
+    // Like the sail row, the bird row ends at the bird; the Raster packer pads the rest.
+    same(cells(frame[0]), " ".repeat(birdColumn) + poseAt(tick), \`bird row at tick \${tick}\`);
+    same(cells(frame[1]), landAt(landOffset, 80), \`land row at tick \${tick}\`);
+    same([sprite.pose(), sprite.position(), sprite.direction(), sprite.landOffset()], [poseAt(tick), birdColumn, 1, landOffset], \`state at tick \${tick}\`);
+    check(frame[0].length <= 2 && frame[0][frame[0].length - 1].color === "bird" && (frame[0].length === 1 || (frame[0][0].color === "plain" && /^ +$/.test(frame[0][0].text))), \`the bird row at tick \${tick} is not plain padding plus one bird run\`);
+    for (const run of frame[1]) {
+      const expected = /^[╱╲]+$/.test(run.text) ? "mountain" : /^↟+$/.test(run.text) ? "pine" : /^▁+$/.test(run.text) ? "meadow" : "mixed";
+      check(run.color === expected, \`land run \${JSON.stringify(run.text)} at tick \${tick} is \${run.color}, not \${expected}\`);
+    }
+    sprite.tick();
+  }
+}
+// The strip repeats: a row wider than one strip shows the same picture again.
+{
+  const sprite = hawk.createCalmWorkingHawkSprite();
+  const row = cells(sprite.frame(130)[1]);
+  same(row.slice(0, 52), STRIP, "the first repeat is not the strip");
+  same(row.slice(52, 104), STRIP, "the second repeat is not the strip");
+  same(row.slice(104), STRIP.slice(0, 26), "the partial third repeat");
+}
+// A narrow track: the land reverses on the tick the bird turns, then reverses back.
+{
+  const sprite = hawk.createCalmWorkingHawkSprite();
+  const seen = [];
+  for (let tick = 0; tick <= 24; tick += 1) {
+    const frame = sprite.frame(5);
+    seen.push([tick, cells(frame[0]), sprite.direction(), sprite.landOffset(), cells(frame[1])]);
+    sprite.tick();
+  }
+  const at = (tick) => seen[tick];
+  same(at(0).slice(1), [UP, 1, 0, landAt(0, 5)], "start");
+  same(at(4).slice(1), [" " + UP, 1, 0, landAt(0, 5)], "first move");
+  same(at(8).slice(1), ["  " + GLIDE, -1, -1, landAt(-1, 5)], "the turn at the right edge reverses the land on that tick");
+  same(at(12).slice(1), [" " + GLIDE, -1, -1, landAt(-1, 5)], "flying back");
+  same(at(16).slice(1), [GLIDE, 1, 0, landAt(0, 5)], "the turn at the left edge reverses the land again");
+  same(at(24).slice(1), ["  " + GLIDE, -1, -1, landAt(-1, 5)], "the second right turn");
+  check(seen.every(([tick, , , offset]) => offset === (tick >= 8 && tick < 16 ? -1 : tick >= 16 && tick < 24 ? 0 : tick >= 24 ? -1 : 0)), "the land moved on a tick other than every eighth");
+}
+// Width fallbacks: nothing at zero, the land alone below three columns, two rows from three.
+{
+  const sprite = hawk.createCalmWorkingHawkSprite();
+  same(sprite.frame(0), [], "zero width painted a row");
+  same(sprite.frame(1).map(cells), [landAt(0, 1)], "one column");
+  same(sprite.frame(2).map(cells), [landAt(0, 2)], "two columns");
+  same(sprite.frame(3).map(cells), [UP, landAt(0, 3)], "three columns");
+  for (const width of [1, 2, 3, 4, 7, 52, 53, 512]) {
+    const frame = sprite.frame(width);
+    check(cells(frame[frame.length - 1]).length === width, \`the land row is not \${width} cells wide\`);
+    for (const row of frame) check(cells(row).length <= width, \`a row overflowed width \${width}\`);
+  }
+}
+// Freeze and resume: restoring the last painted frame discards later ticks; a hidden
+// clamp turns the bird at the new edge; reset restores the initial state.
+{
+  const sprite = hawk.createCalmWorkingHawkSprite();
+  sprite.frame(30);
+  for (let step = 0; step < 9; step += 1) sprite.tick();
+  sprite.frame(30);
+  for (let step = 0; step < 6; step += 1) sprite.tick();
+  sprite.restoreLastRendered();
+  same([sprite.position(), sprite.landOffset(), sprite.pose()], [2, 1, poseAt(9)], "restore did not return to the last painted frame");
+  sprite.clampToWidth(4);
+  same([sprite.position(), sprite.direction()], [1, -1], "a hidden clamp did not turn the bird at the new edge");
+  sprite.reset();
+  same([sprite.position(), sprite.direction(), sprite.landOffset(), sprite.pose()], [0, 1, 0, UP], "reset did not restore the initial state");
+}
+// The land glyph colors as a scene painter sees them.
+same(["↟", "▁", "╱", "╲"].map(hawk.calmWorkingHawkLandColor), ["pine", "meadow", "mountain", "mountain"], "land colors");
+console.log("hawk-ok");
+JS
+  out=$(run_node "$TMP_ROOT/hawk.mjs" 2>&1) || fail "hawk scene: $out"
+  assert_contains "$out" "hawk-ok" "the hawk scene check did not complete"
+  pass "the hawk scene core flaps twice then glides about four seconds, flies the bird at the boat's speed and scrolls the captain's 52-column land strip at half of it, reversing the land on the tick the bird turns, with one color class per land glyph and the ship's freeze, clamp, and reset behavior"
 }
 
 test_presentation_policy() {
@@ -258,6 +380,14 @@ for (const [stored, expected] of [["on\\n", true], ["on", true], [" on \\n", tru
   check(policy.parseCalmPreference(stored) === expected, \`preference \${JSON.stringify(stored)}\`);
 }
 check(policy.serializeCalmPreference(true) === "on\\n" && policy.serializeCalmPreference(false) === "off\\n", "serialized values");
+// The scene setting sits beside the preference under the same home resolution.
+check(policy.calmScenePath({}, plugin) === "/repo/config/calm-scene", "plugin-root fallback for the scene");
+check(policy.calmScenePath({ FM_HOME: "/home/fm", FM_ROOT_OVERRIDE: "/override/root" }, plugin) === "/home/fm/config/calm-scene", "FM_HOME beats FM_ROOT_OVERRIDE for the scene");
+check(policy.calmScenePath({ FM_HOME: "/home/fm", FM_CONFIG_OVERRIDE: "/cfg" }, plugin) === "/cfg/calm-scene", "FM_CONFIG_OVERRIDE beats the home for the scene");
+check(policy.CALM_DEFAULT_SCENE === "ship", "the default scene is not the sailboat");
+for (const [stored, expected] of [["hawk\\n", "hawk"], ["hawk", "hawk"], [" hawk \\n", "hawk"], ["ship\\n", "ship"], ["", "ship"], [undefined, "ship"], ["HAWK", "ship"], ["eagle", "ship"], ["hawk ship", "ship"]]) {
+  check(policy.parseCalmScene(stored) === expected, \`scene \${JSON.stringify(stored)}\`);
+}
 const shortNote = "Checking briefly.";
 const multiLineReply = "The result is substantive.\\nHere is the context needed to continue.";
 const atThresholdReply = "x".repeat(240);
@@ -317,7 +447,7 @@ console.log("policy-ok");
 JS
   out=$(run_node "$TMP_ROOT/policy.mjs" 2>&1) || fail "presentation policy: $out"
   assert_contains "$out" "policy-ok" "the policy check did not complete"
-  pass "the Calm policy resolves the shared preference exactly as Pi does, reads on, max, and off as Pi does, and shares Pi's 240-character-or-newline preservation behavior while classifying working notes by stop reason, tool use, and restored transcript shape"
+  pass "the Calm policy resolves the shared preference and the scene setting exactly as Pi resolves the preference, reads on, max, and off as Pi does, reads only hawk as the hawk scene, and shares Pi's 240-character-or-newline preservation behavior while classifying working notes by stop reason, tool use, and restored transcript shape"
 }
 
 test_branch_notes_over_the_store_owner() {
@@ -599,6 +729,7 @@ JS
 
 test_plugin_shape
 test_shared_sprite_and_pi_rendering
+test_hawk_sprite
 test_raster_packing
 test_presentation_policy
 test_branch_notes_over_the_store_owner

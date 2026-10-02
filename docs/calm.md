@@ -161,6 +161,7 @@ How Calm handles that shared slot depends on whether Calm was already on when th
 - `.pi/extensions/lib/fm-calm-operational-user-layout.ts` owns the zero-height operational-user row adapter.
 - `.pi/extensions/lib/fm-calm-pending-operational-layout.ts` owns the queued-row adapter and its session capability check.
 - `.pi/extensions/lib/fm-calm-working-ship.ts` owns Pi's animated working presentation over the sprite geometry both harnesses share in `.claude/mods/firstmate-calm/lib/fm-calm-working-ship-sprite.ts`.
+- `.claude/mods/firstmate-calm/lib/fm-calm-working-hawk-sprite.ts` owns the hawk scene's geometry and cadences, which only the Claude Code mod draws today.
 
 ### Pi regression entry points
 
@@ -208,7 +209,7 @@ Toggling Calm redraws every hooked row already on screen, so rows drawn before t
 
 ### Working sailboat on Claude Code
 
-While Calm is on, the stock working row (`Sauteing... (12s · 300 tokens)`) becomes the same two-row sailboat Pi draws, from the same shared sprite geometry.
+While Calm is on, and the [scene setting](#working-scenes-on-claude-code) below keeps its default, the stock working row (`Sauteing... (12s · 300 tokens)`) becomes the same two-row sailboat Pi draws, from the same shared sprite geometry.
 The sailboat fills the row inside the transcript margin.
 It repaints on the boat's 220ms cadence, with the hull moving every 880ms.
 It reflows on resize, and appears and disappears exactly where the stock row would.
@@ -223,6 +224,41 @@ On Claude Code the boat is painted in Claude Code's own theme colors rather than
 The theme family follows the `theme` setting by its prefix, `dark` or `light`, and is re-read when the theme changes.
 It uses the light set as the both-readable fallback for `auto`, custom, missing, or unreadable values.
 The Pi extension keeps its standard ANSI blue and yellow.
+
+### Working scenes on Claude Code
+
+The Claude Code mod can draw one of two working animations while Calm is on.
+The per-home `config/calm-scene` setting chooses it: `ship` draws the sailboat above, and `hawk` draws the hawk below.
+The sailboat is the default, so a home without the setting changes nothing.
+[`configuration.md`](configuration.md#calm-scene-configcalm-scene) owns the setting's values, its home resolution, and when an edit takes effect.
+The scene changes only the working row: what Calm hides and keeps visible is the same under either scene.
+Pi does not read the setting and always draws the sailboat.
+
+### Working hawk on Claude Code
+
+With the hawk scene selected, the working row becomes a two-row scene: a hawk flying back and forth above a strip of land.
+
+The hawk looks like this:
+
+- The bird is three cells wide and has three wing poses: `╲v╱` with the wings up, `─v─` gliding, and `╱v╲` with the wings down.
+- It flaps twice, one pose per 220ms tick through the flat pose between beats, then glides for about four seconds (18 ticks, 3960ms).
+  The long glide keeps it feeling calm instead of busy.
+- It moves one column every 880ms, the boat's speed, and turns around at the edges of the row.
+- The land is a hand-drawn strip of 52 columns, `╱╲` mountains, `↟` pines, and `▁` meadow, that repeats across the row, so the same picture comes back every time.
+- The land moves one column every 1760ms, half the bird's speed, so the mountains feel farther away.
+  It passes in the direction opposite to the bird's travel and reverses on the tick the bird turns, as the water's trough follows the boat.
+- A row too narrow for the bird draws the land alone.
+
+The hawk is painted in basic terminal colors, whatever the theme:
+
+| Part | Color | RGB sent to the Raster |
+| --- | --- | --- |
+| The whole bird, in every pose | Yellow | `#cdcd00` |
+| The `╱` and `╲` mountain slopes | Blue | `#0000ee` |
+| The `↟` pines and the `▁` meadow | Green | `#00cd00` |
+
+Claude Code's Raster takes only RGB, so each color is the RGB value xterm assigns to that standard ANSI color, and the terminal paints the nearest color its 256-color quantization offers rather than its own palette entry for that ANSI color.
+A theme change redraws nothing while the hawk is selected.
 
 ### Supervision notes on Claude Code
 
@@ -282,7 +318,7 @@ The mod never touches tool execution or prompts, and adds to the stored transcri
 
 The bounds of the Claude Code support below are recorded with evidence in [`calm-mode-feasibility.md`](calm-mode-feasibility.md#2026-09-15-claude-code-21272-mods-feasibility-and-the-shipped-mod).
 Evidence for 2.1.280 and the record-backed doorbell is also in its [2026-09-25 record](calm-mode-feasibility.md#2026-09-25-claude-code-21280-verification-and-the-record-backed-operational-doorbell) and [2.1.282 reproduction](calm-mode-feasibility.md#2026-09-25-claude-code-21282-reproduction-on-the-installed-build), and for the supervision notes in the [2.1.283 record](calm-mode-feasibility.md#2026-09-28-claude-code-21283-supervision-notes) and their label in the [2.1.284 record](calm-mode-feasibility.md#2026-09-28-claude-code-21284-supervision-note-label-and-the-fm-plugin-name).
-The load-time activation and the run-in-background hint are recorded in the [2.1.287 record](calm-mode-feasibility.md#2026-10-02-claude-code-21287-load-time-activation-and-the-tool-progress-row).
+The load-time activation and the run-in-background hint are recorded in the [2.1.287 record](calm-mode-feasibility.md#2026-10-02-claude-code-21287-load-time-activation-and-the-tool-progress-row), and the hawk scene's glyph acceptance and colors in the [hawk scene record](calm-mode-feasibility.md#2026-10-02-claude-code-21287-hawk-working-scene).
 
 - Claude Code's own declarations for the mods API still say that it may change between releases without notice.
   The mod is verified on Claude Code 2.1.272, 2.1.280, 2.1.282, 2.1.283, 2.1.284, and 2.1.287 and refuses nothing newer.
@@ -298,7 +334,8 @@ The load-time activation and the run-in-background hint are recorded in the [2.1
 - On the main-screen layout (not the fullscreen alternate screen), a toggle redraws the live screen by clearing and reprinting it.
   The terminal's own scrollback keeps the earlier rendering above it.
   The fullscreen layout has no such stale copy.
-- The sailboat is painted through Claude Code's Raster element, whose colors are RGB quantized to 256-color escapes rather than the standard 16-color ANSI codes Pi's widget emits.
+- Both working scenes are painted through Claude Code's Raster element, whose colors are RGB quantized to 256-color escapes rather than the standard 16-color ANSI codes Pi's widget emits.
+  The hawk's basic terminal colors are therefore xterm's RGB values for those ANSI colors, as [Working hawk on Claude Code](#working-hawk-on-claude-code) describes, not the terminal's own palette entries.
 - The detailed transcript view (`ctrl+o`) keeps its per-message timestamp and model headers where hidden assistant rows sat, because those headers are not a hookable drawing.
 - Collapsed thinking never appears in Claude Code's default view.
 - Supervision notes are system-notice rows rather than Pi's rendered entries: Claude Code draws them in one gray with its own bullet and the plugin's name, so the glyph cannot take its own color as on Pi.

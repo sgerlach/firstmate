@@ -79,7 +79,7 @@ test_plugin_suites() {
     printf '%s\n' "$report" >&2
     fail "Claude Code $CLAUDE_VERSION reported Calm mod plugin test failures"
   }
-  pass "Claude Code $CLAUDE_VERSION runs the Calm mod's plugin test suites clean: activation with no environment opt-in, persisted toggle, hidden rows, working notes, the clock-driven working ship, and supervision notes"
+  pass "Claude Code $CLAUDE_VERSION runs the Calm mod's plugin test suites clean: activation with no environment opt-in, persisted toggle, hidden rows, working notes, the clock-driven working ship and hawk scenes with their scene setting, and supervision notes"
 }
 
 test_validate_strict

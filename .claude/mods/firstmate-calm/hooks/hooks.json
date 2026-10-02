@@ -1,4 +1,6 @@
 {
-  "description": "Firstmate Calm hooks module: loading it is the activation, and the shared config/calm preference decides whether Calm is on",
-  "modules": ["./register.ts"]
+  "description": "Firstmate Calm hooks module: loading it is the activation, the shared config/calm preference decides whether Calm is on, and config/calm-scene chooses the sailboat or the hawk",
+  "modules": [
+    "./register.ts"
+  ]
 }

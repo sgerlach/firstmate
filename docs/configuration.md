@@ -11,7 +11,7 @@ Start with the directory layout, then use the setting reference for the behavior
 | Task windows and worker tools | [Runtime backend](#runtime-backend-configbackend--fm_backend) and [harness support](#harness-support) |
 | Worker permissions, accounts, or environment | [Claude permission mode](#claude-permission-mode-configclaude-permission-mode), [worker account pin](#worker-account-pin-configclaude-account-configpi-account), [worker tool exclusions](#worker-tool-exclusions-configcrew-exclude-tools), and [worker launch environment](#worker-launch-environment-configlaunch-env-allowlist) |
 | Backlog, preferences, and memory | [Backlog backend](#backlog-backend-taskstoml--configbacklog-backend), [captain preferences](#captain-preferences-datacaptainmd--datacaptain-sharedmd), and [startup memory budget](#startup-memory-budget-configstartup-memory-budget) |
-| Supervision and presentation | [Pi supervision branch](#pi-supervision-branch), [supervision host](#supervision-host-configsupervision-host), and [Calm preference](#calm-preference-configcalm) |
+| Supervision and presentation | [Pi supervision branch](#pi-supervision-branch), [supervision host](#supervision-host-configsupervision-host), [Calm preference](#calm-preference-configcalm), and [Calm scene](#calm-scene-configcalm-scene) |
 | Persistent secondmates | [Secondmate routes](#secondmate-routes-datasecondmatesmd) |
 | Per-run overrides and tuning | [Environment variables](#environment-variables) |
 
@@ -158,6 +158,30 @@ The Pi extension reloads this preference on every Pi `session_start`, including 
 The Claude Code mod reloads it on every `session.start`, including same-process session replacement.
 It also loads the preference lazily before any row that can draw ahead of that event, including during `claude --continue` restoration.
 This preference is local to each Firstmate home and is not part of secondmate inherited configuration.
+
+## Calm scene (config/calm-scene)
+
+The Claude Code Calm mod reads the optional local, gitignored `config/calm-scene` setting beside `config/calm`, under the same home resolution as the [Calm preference](#calm-preference-configcalm).
+It chooses which working animation replaces the working row while Calm is on, as [docs/calm.md](calm.md#working-scenes-on-claude-code) describes.
+The Pi Calm extension does not read this setting and always draws the sailboat.
+
+### Values and default
+
+| Value or file state | Result |
+| --- | --- |
+| `ship` | The sailboat on water. |
+| `hawk` | The hawk over the land strip. |
+| Absent, unreadable, or unrecognized | Defaults to `ship`. |
+
+The value is read after trimming surrounding whitespace, and only the exact lowercase `hawk` selects the hawk.
+Nothing writes this file: the captain edits it by hand.
+
+### When a change takes effect
+
+The mod reads the setting on every `session.start`, lazily before the first row that draws ahead of that event, and again each time `/calm` turns Calm on.
+To switch scenes in a running session, edit the file and run `/calm` twice.
+A `/calm` that turns Calm off does not re-read it.
+This setting is local to each Firstmate home and is not part of secondmate inherited configuration.
 
 ## Pi supervision branch
 
