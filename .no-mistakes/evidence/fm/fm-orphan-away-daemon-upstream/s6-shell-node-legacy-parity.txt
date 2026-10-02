@@ -1,0 +1,7 @@
+legacy record (Denver): Fri Oct  2 15:56:15 2026     sleep 300
+utc text: Fri Oct  2 21:56:15 2026     sleep 300
+shift 0s: shell=match node=match
+shift 1s: shell=mismatch node=mismatch
+shift 900s: shell=match node=match
+shift 3600s: shell=match node=match
+shift 420s: shell=mismatch node=mismatch

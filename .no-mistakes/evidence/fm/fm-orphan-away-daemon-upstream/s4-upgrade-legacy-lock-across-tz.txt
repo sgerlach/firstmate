@@ -1,0 +1,40 @@
+=== [upgrade: base daemon, branch return] code root: /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-base.BLmTh7
+=== captain's /afk under TZ=America/Denver
+daemon pid: 14245  alive: yes
+daemon lock pid-identity: Fri Oct  2 15:54:15 2026     bash /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T/fm-base.BLmTh7/bin/fm-supervise-daemon.sh
+tmux sessions on lab socket: fm-afk-daemon-3259806574-13652-22033-1790978055 primary 
+=== upgrade: the captain pane now runs the branch code at /Users/scottgerlach/.no-mistakes/worktrees/bb13fd9166b2/01M3Z9DRZ2ECZS1T3EVY8A8FV8
+=== the laptop moves to TZ=Asia/Tokyo; a refresh /afk start must not start a second daemon
+daemon pids now running for this home: 
+lock pid now: 14245
+=== captain returns under TZ=Asia/Tokyo: bin/fm-afk-launch.sh stop
+daemon 14245 alive after return: no
+state/.afk present: no
+daemon lock present: no
+--- captain pane transcript:
+  | TZ=America/Denver bin/fm-afk-launch.sh enter --words 'tz repro away'; echo __done_12272 rc=$?
+  | bash-5.3$ TZ=America/Denver bin/fm-afk-launch.sh enter --words 'tz repro away'; echo __done_12272 rc=$?
+  | Away posture recorded at 2026-10-02T21:54:14Z: hold-for-return only. No phone channel is configured; anything that needs you waits for your return. Your away instructions are recorded verbatim; the away session will carr
+  | y them out where it can, and anything it is unsure of, or that needs you, waits for your return. Destructive, irreversible, and security-sensitive actions are never pre-authorizable, whatever the words say. Expected retu
+  | rn: not given. Spend cap: 4 concurrent workers.
+  | Away posture (recorded):
+  |   entered: 2026-10-02T21:54:14Z
+  |   expected return: not given
+  |   spend cap: 4 concurrent workers
+  |   reach: hold-for-return only. No phone channel is configured; anything that needs you waits for your return.
+  |   your words (verbatim):
+  |     tz repro away
+  | __done_12272 rc=0
+  | bash-5.3$ TZ=America/Denver bin/fm-afk-launch.sh start; echo __done_19169 rc=$?
+  | fm-afk-launch: daemon launched in detached tmux session 'fm-afk-daemon-3259806574-13652-22033-1790978055', supervising %0
+  | __done_19169 rc=0
+  | bash-5.3$ cd /Users/scottgerlach/.no-mistakes/worktrees/bb13fd9166b2/01M3Z9DRZ2ECZS1T3EVY8A8FV8
+  | bash-5.3$ TZ=Asia/Tokyo bin/fm-afk-launch.sh start; echo __done_24230 rc=$?
+  | fm-afk-launch: daemon already running; refreshed away-mode flag (no new terminal)
+  | __done_24230 rc=0
+  | bash-5.3$ TZ=Asia/Tokyo bin/fm-afk-launch.sh stop; echo __done_9234 rc=$?
+  | fm-afk-launch: terminal close command failed, but exact absence was confirmed
+  | fm-afk-launch: away-posture record archived at /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-lab.VSMwIB/state/afk-contracts/1790978054.afk-contract
+  | fm-afk-launch: away mode stopped; daemon terminal torn down, .afk cleared, and the posture record archived
+  | __done_9234 rc=0
+  | bash-5.3$

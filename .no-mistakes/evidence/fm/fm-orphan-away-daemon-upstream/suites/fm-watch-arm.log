@@ -1,0 +1,10 @@
+ok - watch-arm: with away mode off, the arm stops a leftover away daemon instead of attaching, and worker events reach the attended drain
+ok - watch-arm: the arm stops a leftover away daemon whose watcher beacon is stale
+ok - watch-arm: the arm stops a leftover away daemon whose watcher identity drifted, and a time-zone change alone moves nothing
+ok - watch-arm: while away mode is on, the arm still attaches to the away daemon's watcher
+ok - watch-arm: an attached arm reports the wake its cycle delivered instead of a false failure
+ok - watch-arm: a delivered wake consumed by the handling turn still closes the attached arm cleanly
+ok - watch-arm: an unusable launch confirm window refuses to arm by name
+ok - watch-arm: a disposable validation checkout refuses to arm
+ok - watch-arm: a watcher exits when its state directory is removed
+Terminated: 15             sleep 0.1

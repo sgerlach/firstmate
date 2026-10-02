@@ -1,0 +1,49 @@
+################ case tz-arm (branch bf85236b)
+recorded identity: lstart-utc=Fri Oct  2 21:54:47 2026     bash /Users/scottgerlach/.no-mistakes/worktrees/bb13fd9166b2/01M3Z9DRZ2ECZS1T3EVY8A8FV8/bin/fm-watch.sh
+identity under TZ=Asia/Tokyo: lstart-utc=Fri Oct  2 21:54:47 2026     bash /Users/scottgerlach/.no-mistakes/worktrees/bb13fd9166b2/01M3Z9DRZ2ECZS1T3EVY8A8FV8/bin/fm-watch.sh
+--- arm output (arm alive: no):
+check: rearm-resurface
+daemon 44777 alive: no
+old watcher 44818 alive: no
+lock pid now: none
+--- daemon acks:
+(none)
+--- cycle ledger reasons:
+arm_pid=45778 watcher_pid=44818 origin=leftover-daemon reason=leftover-daemon-stopped
+arm_pid=45778 watcher_pid=46131 origin=started reason=actionable-check
+################ case tz-stop (branch bf85236b)
+daemon lock present: no
+--- watcher proof under the recording TZ:
+59634
+--- watcher proof under TZ=Asia/Tokyo:
+59634
+daemon 59634 alive: yes
+old watcher 59848 alive: yes
+lock pid now: 59848
+--- daemon acks:
+(none)
+--- cycle ledger reasons:
+################ case stale-arm (branch bf85236b)
+beacon age before the arm: 5s
+--- arm output (arm alive: no):
+check: rearm-resurface
+daemon 61258 alive: no
+old watcher 61281 alive: no
+lock pid now: none
+--- daemon acks:
+(none)
+--- cycle ledger reasons:
+arm_pid=65960 watcher_pid=61281 origin=leftover-daemon reason=leftover-daemon-stopped
+arm_pid=65960 watcher_pid=66578 origin=started reason=actionable-check
+################ case host-stale (branch bf85236b)
+beacon age before the checkpoint: 5s
+--- checkpoint rc=0 stdout:
+check: rearm-resurface
+--- stderr:
+daemon 78667 alive: no
+old watcher 78726 alive: no
+lock pid now: none
+--- daemon acks:
+(none)
+--- cycle ledger reasons:
+arm_pid=83964 watcher_pid=84027 origin=started reason=actionable-check

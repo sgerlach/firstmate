@@ -1,0 +1,13 @@
+################ case tz-arm (base 87fa81b8)
+recorded identity: Fri Oct  2 15:55:41 2026     bash /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-base.BLmTh7/bin/fm-watch.sh
+identity under TZ=Asia/Tokyo: Sat Oct  3 06:55:41 2026     bash /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-base.BLmTh7/bin/fm-watch.sh
+--- arm output (arm alive: no):
+watcher: already running pid 91344
+watcher: FAILED - cycle ended without an actionable reason
+daemon 91310 alive: yes
+old watcher 91344 alive: no
+lock pid now: 99682
+--- daemon acks:
+daemon-acked 2
+--- cycle ledger reasons:
+arm_pid=91767 watcher_pid=91995 origin=started reason=unexpected-clean-exit

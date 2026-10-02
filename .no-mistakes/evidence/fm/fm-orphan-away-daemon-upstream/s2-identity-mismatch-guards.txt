@@ -1,0 +1,17 @@
+# live pid=94706
+# keyed identity now: lstart-utc=Fri Oct  2 21:51:38 2026     sleep 300
+# legacy record from base code under America/Denver: Fri Oct  2 15:51:38 2026     sleep 300
+all checks run under TZ=Asia/Tokyo; rc=0 match, rc=1 mismatch, rc=2 unreadable
+keyed record, exact: rc=0
+keyed record, start 1s later (pid reuse): rc=1
+keyed record, start 1h earlier: rc=1
+keyed record, other command: rc=1
+legacy record, exact Denver rendering: rc=0
+legacy record moved 1s off the quarter hour: rc=1
+legacy record moved 7 minutes: rc=1
+legacy record at UTC-13:00 (outside civil range): rc=1
+legacy record at UTC+14:00 (inside civil range): rc=0
+legacy record at UTC+14:15 (outside civil range): rc=1
+legacy record, other command: rc=1
+empty record: rc=1
+same keyed record after the process exited: rc=2

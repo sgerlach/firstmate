@@ -1,0 +1,16 @@
+# live process pid=70001 (sleep 300), host TZ=MDT
+base   TZ=America/Denver: Fri Oct  2 15:51:04 2026     sleep 300
+base   TZ=Asia/Tokyo: Sat Oct  3 06:51:04 2026     sleep 300
+base   TZ=Europe/London: Fri Oct  2 22:51:04 2026     sleep 300
+base   TZ=UTC: Fri Oct  2 21:51:04 2026     sleep 300
+branch TZ=America/Denver: lstart-utc=Fri Oct  2 21:51:04 2026     sleep 300
+branch TZ=Asia/Tokyo: lstart-utc=Fri Oct  2 21:51:04 2026     sleep 300
+branch TZ=Europe/London: lstart-utc=Fri Oct  2 21:51:04 2026     sleep 300
+branch TZ=UTC: lstart-utc=Fri Oct  2 21:51:04 2026     sleep 300
+--- branch record written under Denver, matched under Tokyo:
+rc=0
+--- legacy (pre-upgrade) record written by base code under Denver: Fri Oct  2 15:51:04 2026     sleep 300
+matched by branch under TZ=Asia/Tokyo: rc=0
+matched by branch under TZ=Asia/Kolkata: rc=0
+matched by branch under TZ=Australia/Eucla: rc=0
+matched by branch under TZ=UTC: rc=0
