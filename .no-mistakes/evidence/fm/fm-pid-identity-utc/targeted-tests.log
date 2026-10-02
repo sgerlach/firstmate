@@ -1,0 +1,9 @@
+fm-afk-launch            exit=0 not_ok=0
+fm-watcher-lock          exit=0 not_ok=0
+fm-extension-binding     exit=1 not_ok=1
+fm-wake-queue            exit=0 not_ok=0
+fm-procevent             exit=1 not_ok=1
+fm-pending-reply         exit=0 not_ok=0
+fm-supervision-host      running not_ok=0
+fm-remote-job            exit=0 not_ok=0
+fm-claude-stop-autoarm   exit=0 not_ok=0

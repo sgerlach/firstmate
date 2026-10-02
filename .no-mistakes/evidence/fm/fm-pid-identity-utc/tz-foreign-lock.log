@@ -1,0 +1,7 @@
+recorded daemon identity (LA): lstart-utc=Fri Oct  2 18:47:59 2026     bash bin/fm-supervise-daemon.sh 300
+lock pid now names foreign process:  3449 sleep 300
+daemon_lock_held_by_live_daemon (Tokyo)=no
+fm_afk_daemon_owns_supervision (Tokyo)=no
+stop: fm-afk-launch: away mode stopped; no daemon terminal was running, .afk cleared, and the posture record archived
+foreign process alive after return=yes
+lab removed

@@ -1,0 +1,20 @@
+=== [upgrade-base-daemon-then-fixed] daemon code=/tmp/fm-base.0aOukg, later code=/Users/scottgerlach/.no-mistakes/worktrees/bb13fd9166b2/01M3YY6GC6546F3EQ8WESW66D2 lab=/var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-lab.6xqHMZ
+--- step 1: daemon started with host TZ=America/Los_Angeles
+  daemon1.log: afk: starting supervise daemon in foreground; keep this command as a tracked background session
+  lock pid=26836
+  lock pid-identity=Fri Oct  2 11:36:51 2026     bash /tmp/fm-base.0aOukg/bin/fm-supervise-daemon.sh
+  daemon process: 26836 bash /tmp/fm-base.0aOukg/bin/fm-supervise-daemon.sh
+--- step 2: laptop travels; re-enter away mode with host TZ=Asia/Tokyo
+  entry2.log: afk: daemon already running pid=26836
+  entry2.log: exit=0
+  lock pid after re-entry=26836
+  first daemon 26836 alive=yes
+  supervise daemons running in this lab: 26836 
+--- step 3: fm_afk_daemon_owns_supervision from host TZ=Pacific/Auckland
+  owns_supervision=yes
+--- step 4: captain returns; fm-afk-launch.sh stop with host TZ=Europe/London
+  stop.log: fm-afk-launch: away mode stopped; no daemon terminal was running, .afk cleared, and the posture record archived
+  stop.log: exit=0
+  first daemon 26836 alive after return=no
+  state/.afk present after return=no
+=== [upgrade-base-daemon-then-fixed] lab removed

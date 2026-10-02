@@ -1,0 +1,21 @@
+=== [base-87fa81b8] daemon code=/tmp/fm-base.0aOukg, later code=/tmp/fm-base.0aOukg lab=/var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-lab.Y9h5rp
+--- step 1: daemon started with host TZ=America/Los_Angeles
+  daemon1.log: afk: starting supervise daemon in foreground; keep this command as a tracked background session
+  lock pid=22250
+  lock pid-identity=Fri Oct  2 11:36:42 2026     bash /tmp/fm-base.0aOukg/bin/fm-supervise-daemon.sh
+  daemon process: 22250 bash /tmp/fm-base.0aOukg/bin/fm-supervise-daemon.sh
+--- step 2: laptop travels; re-enter away mode with host TZ=Asia/Tokyo
+  entry2.log: afk: starting supervise daemon in foreground; keep this command as a tracked background session
+  entry2.log: error: supervisor target 'captain:0.0' does not resolve to a tmux pane; set FM_SUPERVISOR_TARGET
+  entry2.log: exit=1
+  lock pid after re-entry=<lock gone>
+  first daemon 22250 alive=yes
+  supervise daemons running in this lab: 22250 
+--- step 3: fm_afk_daemon_owns_supervision from host TZ=Pacific/Auckland
+  owns_supervision=no
+--- step 4: captain returns; fm-afk-launch.sh stop with host TZ=Europe/London
+  stop.log: fm-afk-launch: away mode stopped; no daemon terminal was running, .afk cleared, and the posture record archived
+  stop.log: exit=0
+  first daemon 22250 alive after return=yes
+  state/.afk present after return=no
+=== [base-87fa81b8] lab removed

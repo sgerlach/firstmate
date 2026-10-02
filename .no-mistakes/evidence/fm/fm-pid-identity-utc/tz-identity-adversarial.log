@@ -1,0 +1,21 @@
+process A pid=40106  keyed(LA)=lstart-utc=Fri Oct  2 18:37:30 2026     sleep 400
+process A legacy(LA)=Fri Oct  2 11:37:30 2026     sleep 400
+CASE (expected status: 0 match, 1 mismatch, 2 unreadable)                STATUS
+keyed A recorded in LA, checked in Tokyo (expect 0)                      0
+keyed A checked in Kathmandu +05:45 (expect 0)                           0
+legacy A recorded in LA, checked in Tokyo (expect 0)                     0
+legacy A recorded in Chatham +13:45, checked in LA (expect 0)            0
+ADVERSARIAL: A's keyed record against live foreign pid B (expect 1)      1
+ADVERSARIAL: A's legacy record against live foreign pid B (expect 1)     1
+ADVERSARIAL: legacy A shifted 37 min (not a zone offset) (expect 1)      1
+ADVERSARIAL: legacy A shifted 22 h, UTC+15 (beyond any zone) (expect 1)  1
+ADVERSARIAL: keyed A shifted 1 h (keyed must be exact) (expect 1)        1
+ADVERSARIAL: empty record against live A (expect 1)                      1
+--- Node mirror parity on the same records (shell verdict vs node verdict)
+  shell=0 node=0  record=Fri Oct  2 11:37:30 2026     sleep 400...
+  shell=0 node=0  record=Sat Oct  3 08:22:30 2026     sleep 400...
+  shell=1 node=1  record=Fri Oct  2 12:14:30 2026     sleep 400...
+  shell=1 node=1  record=Sat Oct  3 09:37:30 2026     sleep 400...
+  shell=1 node=1  record=Fri Oct  2 11:37:30 2026     sleep 401...
+ADVERSARIAL: keyed A after A exited (dead pid) (expect 2)                2
+ADVERSARIAL: legacy A after A exited (dead pid) (expect 2)               2
