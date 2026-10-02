@@ -267,7 +267,7 @@ grok 0.2.106 (bde89716f679)
 
 | Harness | Conclusion | Evidence |
 | --- | --- | --- |
-| Claude Code 2.1.272 (superseding the 2.1.218 row, which found no transcript-row renderer in project hooks or the plugin CLI) | Feasible through the early-access Claude Code mods surface (function hooks), default-off behind `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS`, and initially shipped with the plugin name `firstmate-calm` (now `fm`; see [`calm.md`](calm.md#the-calm-mod)). | A `ui.render` hook draws per-component transcript rows and the working row, `$.ui.invalidate` redraws the transcript, and `$.ui.blit` animates a `Raster`; the [2026-09-15 record](#2026-09-15-claude-code-21272-mods-feasibility-and-the-shipped-mod) owns the spike-verified working animation, gapless hiding and retroactive redraw of tool, narration, and operational rows, the persisted per-home toggle, and the three bounded gaps: an early-access API that may change, main-screen scrollback keeping pre-toggle copies, and 256-color Raster paint. |
+| Claude Code 2.1.272 through 2.1.287 (superseding the 2.1.218 row, which found no transcript-row renderer in project hooks or the plugin CLI) | Feasible through the Claude Code mods surface (function hooks), default-off behind `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` through 2.1.285 and loaded for the trusted project with no opt-in on 2.1.287, and initially shipped with the plugin name `firstmate-calm` (now `fm`; see [`calm.md`](calm.md#the-calm-mod)). | A `ui.render` hook draws per-component transcript rows and the working row, `$.ui.invalidate` redraws the transcript, and `$.ui.blit` animates a `Raster`; the [2026-09-15 record](#2026-09-15-claude-code-21272-mods-feasibility-and-the-shipped-mod) owns the spike-verified working animation, gapless hiding and retroactive redraw of tool, narration, and operational rows, the persisted per-home toggle, and the three bounded gaps: an API that may change between releases, main-screen scrollback keeping pre-toggle copies, and 256-color Raster paint; the [2026-10-02 record](#2026-10-02-claude-code-21287-load-time-activation-and-the-tool-progress-row) owns the load-time activation. |
 | Codex CLI 0.144.6 | Not feasible through the inspected supported project surface. | The tracked hooks expose session, pre-tool, and stop handling, while the plugin and feature inventories expose no TUI tool-row renderer or transcript redraw control. |
 | OpenCode 1.17.18 | Not feasible without violating the preservation boundary. | Plugins expose events and tool execution hooks, not a built-in transcript-row renderer; same-name tool replacement changes execution rather than presentation alone. |
 | Pi (verified 0.81.1 through 0.82.0) | Partially feasible with two API-probed exported-class adapters. | Public APIs control working visibility, collapsed labels, known tool slots, custom entries, and expansion redraws; exported assistant and interactive-mode classes provide the collapsed-thinking and operational-user layout boundaries, gated on the exact method's presence rather than a version number, while generic user, tool, and status filtering remains unavailable. |
@@ -311,9 +311,9 @@ Queued-row coverage drives Pi's real listing and restore methods over a stand-in
 `tests/fm-calm-pi-queue-retention-live-e2e.test.sh` is the default-on, token-free guard that probes a running Pi session for every member the check requires and fails naming the installed Pi version.
 `tests/fm-pi-primary-live-e2e.test.sh` also proves the working ship replaces the built-in `Working...` row while Calm is active on the credentialed provider path, and that it clears when the run settles, before continuing its ordinary watcher lifecycle.
 `tests/fm-pi-primary-types.test.sh` performs strict no-emit TypeScript checking against whichever Pi declarations are installed, without pinning a version of its own.
-`tests/fm-calm-claude-mod.test.sh` needs no Claude Code binary: it proves the mod is one hooks module with no command, skill, agent, or classic hook path around its opt-in, that Pi's working ship renders byte-for-byte the shared sprite core painted in ANSI at every width and step, that the Raster packing lays that frame out exactly, that the mod resolves its home like Pi, that its live and restored working-note classifiers enforce the visibility boundaries [`calm.md`](calm.md#claude-code) owns, and that its operational-input classifier agrees with `bin/fm-operational-input.sh` on a corpus the shell owner itself encodes plus legacy shapes and near misses.
+`tests/fm-calm-claude-mod.test.sh` needs no Claude Code binary: it proves the mod is one hooks module with no command, skill, agent, or classic hook that runs without that module, that Pi's working ship renders byte-for-byte the shared sprite core painted in ANSI at every width and step, that the Raster packing lays that frame out exactly, that the mod resolves its home like Pi, that its live and restored working-note classifiers enforce the visibility boundaries [`calm.md`](calm.md#claude-code) owns, and that its operational-input classifier agrees with `bin/fm-operational-input.sh` on a corpus the shell owner itself encodes plus legacy shapes and near misses.
 `tests/fm-calm-claude-mod-plugin.test.sh` runs wherever `claude` is installed without spending a model turn: strict `claude plugin validate` on the folder and on the `.claude/skills` auto-load path, then the mod's own `claude plugin test` suites, which drive the hooks module in the engine's host against a mocked clock, environment, file system, and drawing surface.
-`tests/fm-calm-claude-mod-live-e2e.test.sh` is the opt-in credentialed guard in a real Claude Code TUI under tmux: flag off is a complete no-op with the preference already on, flag on shows the moving boat, hides tool and operational rows, toggles and persists through `/calm`, and `claude --continue` restores the hidden rows.
+`tests/fm-calm-claude-mod-live-e2e.test.sh` is the default-on, token-free guard in a real Claude Code TUI under tmux, isolated in a temporary `CLAUDE_CONFIG_DIR` with `tests/assets/fm-claude-scripted-messages-api.py` as the model: the mod loads with no opt-in and with the retired variable at `0`, Calm off draws the stock rows, `/calm` shows the moving boat and hides tool rows, the run-in-background hint, narration, and operational rows, toggles and persists, `claude --continue` restores the hidden rows, and no model request carries a supervision note.
 
 The relevant commands are:
 
@@ -325,7 +325,7 @@ tests/fm-pi-primary-types.test.sh
 tests/fm-calm-pi-queue-retention-live-e2e.test.sh
 tests/fm-calm-claude-mod.test.sh
 tests/fm-calm-claude-mod-plugin.test.sh
-FM_CLAUDE_CALM_LIVE_E2E=1 tests/fm-calm-claude-mod-live-e2e.test.sh
+tests/fm-calm-claude-mod-live-e2e.test.sh
 ```
 
 ## 2026-07-23 verification record
@@ -891,3 +891,130 @@ ok - Claude Code 2.1.284 (Claude Code) with the flag on: the mod auto-loads from
 ok - Claude Code 2.1.284 (Claude Code) resumes the transcript with Calm's hidden rows still hidden and the preference intact
 ok - Claude Code 2.1.284 (Claude Code) with Calm off shows the supervision notes: the session-start anchor for an unprocessed captain outcome, a sailboat for a new routine outcome, an anchor for a new captain outcome, and the latch-trip note, each behind the fm: label, skipping processed and silent outcomes, moving no store marker, never reaching the model, and on resume showing each anchor once
 ```
+
+## 2026-10-02 Claude Code 2.1.287 load-time activation and the tool-progress row
+
+Claude Code 2.1.287 loads a mod's hooks module with no environment opt-in, so the mod's own check that `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` equals `1` left Calm off in every session that did not set that variable.
+The mod no longer reads the variable: loading the mod is its activation, and [`calm.md`](calm.md#loading-the-mod) owns the current load contract.
+This record supersedes the opt-in statements in the earlier Claude Code records above.
+
+### The load gate across installed builds
+
+Each installed build's own binary resolves the hooks-module gate for installed plugins as below, where the call reads the `tengu_plugin_hooks_modules` rollout switch with the default beside it:
+
+```text
+2.1.281: var hst="tengu_plugin_hooks_modules";var dnn=()=>!1;var tve=()=>a.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS??x(hst,dnn());
+2.1.283: var Kct="tengu_plugin_hooks_modules";var Fcn=()=>!1;var Ule=()=>a.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS??x(Kct,Fcn());
+2.1.284: var Kut="tengu_plugin_hooks_modules";var xpn=()=>!1;var Hce=()=>a.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS??x(Kut,xpn());
+2.1.285: var r9e="tengu_plugin_hooks_modules";var GNt=()=>!1;var u5=()=>a.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS??x(r9e,GNt());
+2.1.286: var S8e="tengu_plugin_hooks_modules";var t1t=!0;var L5=()=>a.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS??R(S8e,t1t);
+2.1.287: var RYe="tengu_plugin_hooks_modules";var mUt=!0;var YJ=()=>k(RYe,mUt);
+```
+
+- Through 2.1.285 the variable decided whenever it was set, and the switch defaulted off.
+- 2.1.286 kept the variable as an override and defaulted the switch on.
+- 2.1.287 reads only the switch, which defaults on; the variable's name survives only in the binary's lists of environment names, and no code reads it.
+
+The switch stays remote.
+This session's flag payload decides it; before the payload arrives, the disk cache that an earlier session wrote into the global configuration decides it; with flag fetches disabled (nonessential traffic off, telemetry opted out, or a third-party provider) or nothing cached, the built-in default decides it.
+The external build has no local override.
+When the switch serves off, the engine logs `hooks modules are turned off for installed plugins in this process: the rollout switch served off; built-in plugins load regardless` and loads no installed plugin's module, `--plugin-dir` and project `.claude/skills` plugins included.
+On this host the cached value in the global configuration read `false`, and three minutes later `true`, after another concurrent session rewrote that file.
+
+### Trust
+
+Started in an untrusted lab project with the mod linked under `.claude/skills`, the engine logged `hooks modules not loaded until workspace trust is accepted: cc-plugin-agents-md, cc-plugin-diff` and did not list `fm` at all.
+Accepting the trust dialog loaded the mod in that same session, with no restart:
+
+```text
+[DEBUG] hooks module fm@skills-dir loaded (worker, environment 1, tier user); events: session.start,command.run,config.set,turn.step,ui.render
+[DEBUG] plugin.register: fm (user, fm@skills-dir), judged by core alone: admitted
+```
+
+### API changes the mod absorbed
+
+- 2.1.287 adds the `ToolProgress` render component, today only the run-in-background hint under a running tool call.
+  With Calm on, the hint drew alone where the hidden tool row sat, as `(ctrl+b ctrl+b (twice) to run in background)`; the mod now hides it with the other tool rows.
+- The declarations now require `Spinner.suffix`, `UserMessage.isExpanded`, and the stat result's `isLink`, and a `$.ui.blit` may carry an image `source` in place of `cells`.
+  Only the test fixtures needed changes; the hooks module and its libraries type-check unchanged.
+- The `/calm` notice now draws as a small card at the top right, under the plugin's name, rather than under the prompt.
+
+### The isolated live lab
+
+Every live capture below came from real Claude Code 2.1.287 TUIs under tmux at 160 by 44 cells, each with a temporary `CLAUDE_CONFIG_DIR` that had finished onboarding, trusted only the lab project, and approved a dummy API key.
+The model was a scripted local Messages API on `127.0.0.1`, reached through `ANTHROPIC_BASE_URL`, so no credential was read and no model token was spent; the screens below come from `tests/assets/fm-claude-scripted-messages-api.py`.
+`CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` disabled flag fetches, so the rollout switch resolved from its default: the lab proves the engine's trusted-project load path, not the value an account's switch serves.
+After the runs no lab path appeared in the host's global configuration or under `~/.claude/projects`.
+
+With no environment opt-in, and again with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=0`, the debug log showed `hooks module fm@skills-dir loaded (worker, environment 1, tier user)` and the typeahead listed `/calm`.
+With Calm off, a narrated Bash turn drew the stock rows, including the run-in-background hint, mid-turn and settled:
+
+```text
+❯ Read notes.txt with the Bash tool, then reply with one short sentence naming the three words.
+⏺ Let me read the notes.
+  Reading the notes · 4s
+  ⎿  $ sleep 8; cat notes.txt (4s)
+     (ctrl+b ctrl+b (twice) to run in background)
+✻ Brewing… (5s · ↓ 23 tokens)
+
+❯ Read notes.txt with the Bash tool, then reply with one short sentence naming the three words.
+⏺ Let me read the notes.
+  Ran 1 shell command
+⏺ The three words are alpha, beta, and gamma.
+✻ Crunched for 11s · done 9:45 AM
+```
+
+`/calm` then redrew that settled turn without its narration and tool row, showed the top-right card `fm` / `Calm on`, and wrote `on` to the shared preference.
+A Calm-on turn drew the boat in place of the stock row on every sampled frame, with no tool row and no run-in-background hint; the hull advanced one column about every 0.9s, and the 256-color escapes for the dark theme were `38;5;173` for the boat and `38;5;111` for the water:
+
+```text
+❯ Read notes.txt with the Bash tool, then reply with one short sentence naming the three words.
+⏺ The three words are alpha, beta, and gamma.
+✻ Crunched for 11s · done 9:45 AM
+❯ Read notes.txt with the Bash tool, then reply with one short sentence naming the three words.
+      ◿│◣
+▁▁▁▁▁╲▁▁▁╱▁▁▁▁▁▁▂▂▃▃▃▄▄▄▄▄▃▃▂▂▂▁▁▁▁▁▁▂▂▂▃▃▃▄▄▄▄▄▄▃▃▃▂▂▂▁▁▁▁▁▁▂▂▂▃▃▄▄▄▄▄▄▃▃▃▂▂▁▁▁▁▁▁▂▂▂▃▃▃▄▄▄▄▄▄▃▃▂▂▁▁▁▁▁▂▂▂▃▃▃▄▄▄▄▄▄▃▃▃▂▂▂▁▁▁▁▁▁▁▂▂▂▃▃▃▄▄▄▄▄▄▃▃▂▂▁▁▁▁▁▂▂▃▃▃▄▄▄
+```
+
+A record-backed doorbell from `bin/fm-operational-input.sh record watcher` drew no row while its answer showed.
+`/calm` off restored the narration, the `Ran 1 shell command` rows, and the doorbell row, showed the card `fm` / `Calm off`, and wrote `off`; `/calm` on hid them again and wrote `on`.
+`claude --continue` restored the transcript with those rows still hidden, and the `ctrl+o` detailed view kept tool rows and the doorbell hidden, showing only the per-message timestamp and model headers where hidden rows sat.
+
+### Commands and output
+
+The type check used TypeScript 5.9.3 with the `tsconfig.json` from the header of the 2.1.287 declarations, kept outside the mod folder, and `allowImportingTsExtensions` for the mod's `.ts` imports; its `include` named the declarations file and the mod's `hooks`, `lib`, and `tests`.
+
+```text
+$ claude --version
+2.1.287 (Claude Code)
+
+$ env -u CLAUDE_CODE_ENABLE_FUNCTION_HOOKS claude plugin validate --strict .claude/mods/firstmate-calm
+  ❯ ./register.ts hooks: session.start, command.run{command=calm}, config.set{key=theme}, turn.step, ui.render{component=Spinner}, ui.render{component=ToolUse}, ui.render{component=ToolResult}, ui.render{component=ToolGroup}, ui.render{component=ToolProgress}, ui.render{component=UserMessage}, ui.render{component=AssistantMessage}
+  ❯ ./register.ts env writes: nothing
+  ❯ ./register.ts env reads: FM_CONFIG_OVERRIDE, FM_HOME, FM_ROOT_OVERRIDE, FM_STATE_OVERRIDE
+✔ Validation passed
+
+$ env -u CLAUDE_CODE_ENABLE_FUNCTION_HOOKS claude plugin test .claude/mods/firstmate-calm
+ 52 pass
+ 0 fail
+Ran 52 tests across 3 files.
+
+$ tsc -p <the tsconfig.json above>
+(no output; exit 0)
+
+$ bash tests/fm-calm-claude-mod.test.sh
+ok - the Calm mod is one hooks module, linked into the project's auto-load path, with no command, skill, agent, or classic hook that runs without that module
+
+$ bash tests/fm-calm-claude-mod-plugin.test.sh
+ok - Claude Code 2.1.287 (Claude Code) validates the Calm mod strictly at its folder and its auto-load path, hooking exactly the working row, tool, user, and assistant drawings and /calm, and logging supervision notes
+ok - Claude Code 2.1.287 (Claude Code) runs the Calm mod's plugin test suites clean: activation with no environment opt-in, persisted toggle, hidden rows, working notes, the clock-driven working ship, and supervision notes
+
+$ bash tests/fm-calm-claude-mod-live-e2e.test.sh
+ok - Claude Code 2.1.287 (Claude Code) loads the Calm mod from .claude/skills with no environment opt-in and with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=0, lists /calm, and with Calm off draws the stock working row, tool row, run-in-background pill, and narration
+ok - Claude Code 2.1.287 (Claude Code) with Calm on: /calm hides the rows already on screen, the sailboat replaces and moves in the working row, tool rows, the run-in-background pill, the narration, and the record-backed operational doorbell draw at zero height, and /calm restores and re-hides them while persisting the shared preference
+ok - Claude Code 2.1.287 (Claude Code) resumes the transcript with Calm's hidden rows still hidden and the preference intact
+ok - Claude Code 2.1.287 (Claude Code) with Calm off shows the supervision notes: the session-start anchor for an unprocessed captain outcome, a sailboat for a new routine outcome, an anchor for a new captain outcome, and the latch-trip note, each behind the fm: label, skipping processed and silent outcomes, moving no store marker, reaching no model request, and on resume showing each anchor once
+```
+
+The live guard fails against each fault it must catch: run against the previous module, which required the variable, it stops at `not ok - Claude Code 2.1.287 (Claude Code) does not list /calm with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=0`, and run without the `ToolProgress` hook it stops at `not ok - a tool row or the run-in-background pill drew while Calm was on`.
+The Pi suite stays green against the unchanged shared libraries: `bin/fm-test-run.sh tests/fm-calm-pi-extension.test.sh` reported `FM_TEST_SUMMARY total=1 failed=0 skipped_gate=0`.
