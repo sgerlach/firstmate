@@ -1,0 +1,5 @@
+away mode active (state/.afk present: yes); daemon=88258 watcher=88743 parent=88258
+arm output after 8s:
+watcher: already running pid 88743
+watcher: attached pid=93849 (beacon 0s)
+daemon 88258 alive: yes; watcher still 93849 parent 88258

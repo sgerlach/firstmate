@@ -1,0 +1,8 @@
+--- fm-watch-arm.sh output:
+check: rearm-resurface
+arm rc=0
+--- fm-wake-drain:
+STATUS OUTCOME BACKSTOP (newest captain-facing task event has no covering branch outcome):
+task-w7 done [at=1790956317]: PR https://example.test/pr/77 checks green
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 0 --recovery-generation 15296.1790956305.a1V26i
+--- .subsuper-escalations contains pr/77: 0

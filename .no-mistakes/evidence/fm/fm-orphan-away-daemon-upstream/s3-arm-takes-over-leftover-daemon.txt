@@ -1,0 +1,19 @@
+before arm: daemon 55182 alive=yes watcher=78148 ppid=55182
+after arm (12s): daemon 55182 alive=no; watcher= parent=
+arm output so far:
+check: rearm-resurface
+arm rc=0
+--- cycle ledger:
+arm_pid=30094	watcher_pid=30115	origin=started	started_at=1790956314	ended_at=1790956314	exit_code=0	signal=none	reason=actionable-check	beacon_age=0	lock_before=pid:none|identity:none	lock_after=pid:none|identity:none	successor=none
+arm_pid=84640	watcher_pid=78148	origin=leftover-daemon	started_at=1790956383	ended_at=1790956384	exit_code=none	signal=none	reason=leftover-daemon-stopped	beacon_age=10	lock_before=pid:78148|identity:Fri Oct  2 09:52:54 2026     bash /tmp/fm-mix.7WSzM2/bin/fm-watch.sh	lock_after=pid:none|identity:none	successor=daemon:55182
+arm_pid=84640	watcher_pid=85658	origin=started	started_at=1790956384	ended_at=1790956385	exit_code=0	signal=none	reason=actionable-check	beacon_age=1	lock_before=pid:none|identity:none	lock_after=pid:none|identity:none	successor=none
+--- attended drain after the takeover:
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 0 --recovery-generation 78148.1790956383.6n5tyV
+--- next attended arm after a new worker event:
+watcher: started pid=5932 (beacon fresh)
+signal: /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-lab.Yw1bW0/state/task-w9.status
+arm rc=0
+1790956455	5	signal	task-w9.status	signal: /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-lab.Yw1bW0/state/task-w9.status
+wake annotation: latest wake-EVENT observed at drain, not current state: task-w9.status: done [at=1790956412]: PR https://example.test/pr/99 after takeover
+task-w9 done [at=1790956412]: PR https://example.test/pr/99 after takeover
+live supervise daemons for the lab: 0

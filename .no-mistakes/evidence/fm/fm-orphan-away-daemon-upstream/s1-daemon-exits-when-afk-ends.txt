@@ -1,0 +1,8 @@
+removed state/.afk at 1790956305; daemon 14954 gone after 0s: yes
+watcher 15296 alive: no
+pid file present: no
+lock present: no
+--- daemon log tail:
+[2026-10-02T09:51:28-0600] daemon starting (pid 14954); target=%0; target_source=FM_SUPERVISOR_TARGET; backend=tmux; backend_source=FM_SUPERVISOR_BACKEND; afk=on; inject_skip='heartbeat'; stale_escalate=240s; batch=90s
+[2026-10-02T09:51:45-0600] exiting: away and quiet mode are no longer active
+[2026-10-02T09:51:45-0600] daemon shutting down

@@ -1,0 +1,4 @@
+ok - lifecycle: routine self-handles, terminal survives a watcher restart, buffers once, no dup, injects once
+ok - lifecycle: stale pane transient self-handles, persistent escalates once and clears, resumed clears quietly
+ok - lifecycle: an away daemon exits on its own when away mode ends, and worker events reach the attended drain
+ok - lifecycle: an away daemon that no longer holds its lock exits without touching its successor

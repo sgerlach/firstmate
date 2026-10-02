@@ -1,0 +1,6 @@
+pre-fix daemon 53386 alive: yes; watcher=53558 parent=53386; state/.afk present: no
+--- fm-watch-checkpoint.sh --seconds 20:
+check: rearm-resurface
+checkpoint rc=0 after 2s
+daemon 53386 alive after checkpoint: no
+lab supervise daemons: 0

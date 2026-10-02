@@ -1,0 +1,7 @@
+recorded pid-identity: Fri Oct  2 09:51:28 2026     bash /Users/scottgerlach/.no-mistakes/worktrees/bb13fd9166b2/01M3YMHK3PV6DSB4CKD711KMBH/bin/fm-supervise-daemon.sh
+identity now (TZ=Asia/Tokyo): Sat Oct  3 00:51:28 2026     bash /Users/scottgerlach/.no-mistakes/worktrees/bb13fd9166b2/01M3YMHK3PV6DSB4CKD711KMBH/bin/fm-supervise-daemon.sh
+--- re-entry with TZ=Asia/Tokyo:
+afk: daemon already running pid=14954
+rc=0
+lock after re-entry: /private/var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T/fm-lab.Yw1bW0/state/.supervise-daemon.lock.owner.D9h93o pid=14954
+daemon 14954 alive: 14954 bash /Users/scottgerlach/.no-mistakes/worktrees/bb13fd9166b2/01M3YMHK3PV6DSB4CKD711KMBH/bin/fm-supervise-daemon.sh

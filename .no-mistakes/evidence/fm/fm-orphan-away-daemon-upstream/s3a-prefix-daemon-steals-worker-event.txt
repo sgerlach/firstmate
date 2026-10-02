@@ -1,0 +1,8 @@
+pre-fix daemon=55182 (bash /tmp/fm-mix.7WSzM2/bin/fm-supervise-daemon.sh) watcher=55432
+removed the daemon lock and state/.afk (incident state)
+after 5s: daemon alive=yes; watcher=55432 ppid=55182
+worker event pr/88 in .subsuper-escalations (nobody reads it while away mode is off): 0
+ugrep: warning: /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-lab.Yw1bW0/state/.subsuper-escalations: No such file or directory
+--- pre-fix daemon log after the worker event (it took the wake while state/.afk is absent):
+[2026-10-02T09:52:53-0600] escalate: signal: /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-lab.Yw1bW0/state/task-w7.status /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-lab.Yw1bW0/state/task-w8.status -> task-w7.status: done [at=1790956317]: PR https://example.test/pr/77 checks green | task-w8.status: done [at=1790956344]: PR https://example.test/pr/88 lost-update repro
+[2026-10-02T09:52:53-0600] self-handle: signal: /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-lab.Yw1bW0/state/task-w7.status /var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T//fm-lab.Yw1bW0/state/task-w8.status -> signal already escalated (catch-all scan): task-w7.status: done [at=1790956317]: PR https://example.test/pr/77 checks green | task-w8.status: done [at=1790956344]: PR https://example.test/pr/88 lost-update repro

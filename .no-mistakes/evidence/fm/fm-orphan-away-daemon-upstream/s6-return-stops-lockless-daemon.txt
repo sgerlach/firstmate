@@ -1,0 +1,7 @@
+--- normal stop of daemon 88258:
+fm-afk-launch: away mode stopped; no daemon terminal was running, .afk cleared, and the posture record archived
+rc=0 daemon alive=no
+--- lockless pre-fix daemon 21592, watcher 23049, state/.afk present, lock present: no
+fm-afk-launch: away mode stopped; no daemon terminal was running, .afk cleared, and the posture record archived
+stop rc=0
+daemon 21592 alive: no; watcher 23049 alive: no; state/.afk present: no

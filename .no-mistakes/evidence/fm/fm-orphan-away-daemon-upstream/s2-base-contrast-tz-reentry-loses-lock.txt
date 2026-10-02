@@ -1,0 +1,9 @@
+BASE f50e9cd: live daemon 27822, lock pid=27822
+(eval):7: command not found: timeout
+after TZ=Asia/Tokyo re-entry on base: first daemon 27822 alive=yes; lock pid now=27822
+BASE f50e9cd: live daemon 27822 held lock owner /private/var/folders/37/gndjxlyd40q_lxcnwksl68sm0000gn/T/fm-lab.Yw1bW0/state/.supervise-daemon.lock.owner.mJdWPk
+--- TZ=Asia/Tokyo re-entry output:
+afk: starting supervise daemon in foreground; keep this command as a tracked background session
+error: supervisor target '%0' does not resolve to a tmux pane; set FM_SUPERVISOR_TARGET
+first daemon 27822 alive=yes; lock owner now= pid=none
+base supervise daemons running: 27822 
