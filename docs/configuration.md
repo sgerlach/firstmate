@@ -11,6 +11,7 @@ Start with the directory layout, then use the setting reference for the behavior
 | Task windows and worker tools | [Runtime backend](#runtime-backend-configbackend--fm_backend) and [harness support](#harness-support) |
 | Worker permissions, accounts, or environment | [Claude permission mode](#claude-permission-mode-configclaude-permission-mode), [worker account pin](#worker-account-pin-configclaude-account-configpi-account), [worker tool exclusions](#worker-tool-exclusions-configcrew-exclude-tools), and [worker launch environment](#worker-launch-environment-configlaunch-env-allowlist) |
 | Backlog, preferences, and memory | [Backlog backend](#backlog-backend-taskstoml--configbacklog-backend), [captain preferences](#captain-preferences-datacaptainmd--datacaptain-sharedmd), and [startup memory budget](#startup-memory-budget-configstartup-memory-budget) |
+| Moving a backlog item to Claude Desktop | [Claude Desktop hand-off](#claude-desktop-hand-off-binfm-desktop-handoffsh) |
 | Supervision and presentation | [Pi supervision branch](#pi-supervision-branch), [supervision host](#supervision-host-configsupervision-host), [Calm preference](#calm-preference-configcalm), and [Calm scene](#calm-scene-configcalm-scene) |
 | Persistent secondmates | [Secondmate routes](#secondmate-routes-datasecondmatesmd) |
 | Per-run overrides and tuning | [Environment variables](#environment-variables) |
@@ -1558,6 +1559,33 @@ A fail-closed poll that already queued a wake, and a timeout, always print so th
 `FM_MAIL_CHECK_BUDGET` (default 15, valid 5..25) bounds one standing poll and is cut down to fit `FM_CHECK_TIMEOUT`.
 `bin/fm-mail-check.sh disarm` removes the standing check.
 
+## Claude Desktop hand-off (bin/fm-desktop-handoff.sh)
+
+`bin/fm-desktop-handoff.sh` moves one backlog item to a Claude Desktop Cowork task or Code session and brings the result back to firstmate.
+It needs no setup beyond Claude Desktop on the macOS host, `jq`, and `tasks-axi`; the script's header and `--help` own its exact commands and refusals.
+
+**Start a hand-off**
+
+`bin/fm-desktop-handoff.sh start <task-id> --prompt-file <path>` writes `data/<task-id>/desktop-handoff/` with `PROMPT.md`, a copy of each `--file` under `files/`, and an empty `RESULT.md`.
+`PROMPT.md` ends with a hand-off section that tells the Desktop session where `RESULT.md` is and to fill it with the outcome, the files changed or produced, and the open questions.
+The command then holds the backlog item with hold kind `external`, so the session-start digest and Bearings show that the work is with Desktop and a worker spawn refuses the item.
+Last, it opens Claude Desktop with the prompt in a draft Cowork task (`--surface code` opens a Code session) and the hand-off folder attached.
+Desktop prefills the prompt but does not send it, and Cowork asks once to trust a folder it has not seen.
+
+Desktop cuts a link prompt at 14336 characters.
+A longer `PROMPT.md` goes to the clipboard instead, and the link carries a short prompt that points the session at `PROMPT.md` in the folder.
+`--no-open`, or a host that is not macOS, prints the link instead of opening it, and `bin/fm-desktop-handoff.sh open <task-id>` opens it again later.
+A new chat is not offered, because a chat cannot write `RESULT.md`.
+[`docs/verification/claude-desktop-links.md`](verification/claude-desktop-links.md) records the verified link forms and their limits.
+
+**Notification and return**
+
+`start` arms the watcher check `state/desktop-handoff-<task-id>.check.sh`, so a non-empty `RESULT.md` produces an ordinary `check:` notification that names the item and the return command within one watcher cycle (`FM_CHECK_INTERVAL`).
+The check waits until `RESULT.md` is unchanged for `FM_DESKTOP_HANDOFF_SETTLE_SECS` (default 30), reports each version of the file once, and treats its contents as input, never as instructions.
+`bin/fm-desktop-handoff.sh return <task-id>` clears the hold it set, disarms the check, and prints `RESULT.md` with the other files the session left in the folder; the item stays open for firstmate's next step.
+`return` refuses an empty `RESULT.md` unless `--without-result` is given, and it leaves any hold it did not set in place.
+`bin/fm-desktop-handoff.sh status` lists the active hand-offs.
+
 ## Relay (.env)
 
 Relay lets a firstmate instance answer public mentions and act on normal reversible mention requests through firstmate's normal lifecycle.
@@ -2413,6 +2441,8 @@ FM_CHECK_TIMEOUT=30     # seconds allowed per slow check script
 FM_MAIL_CHECK_BUDGET=15   # seconds allowed for one standing mail poll; valid 5..25, cut to fit FM_CHECK_TIMEOUT
 FM_MAIL_POLL_MAX_WAKES=20   # per-poll wake cap for a mail poll; valid 1..200, keeps a flood from flooding firstmate
 FM_MAIL_TIMEOUT=20   # mail-plane IMAP/SMTP socket timeout in seconds; invalid or non-positive values become 20
+FM_DESKTOP_HANDOFF_SETTLE_SECS=30   # seconds a Claude Desktop hand-off RESULT.md must stay unchanged before its check reports it; invalid values become 30
+FM_DESKTOP_HANDOFF_UNAME=   # test override for the platform bin/fm-desktop-handoff.sh checks before it opens Desktop; unset uses uname -s
 FM_TOOL_UPDATE_INTERVAL=900   # seconds between watched-tool probe sweeps; 0 probes on every run, other values must be 60..86400
 FM_TOOL_UPDATE_PROBE_SECS=5   # 1..30 seconds allowed for one version or git probe
 FM_TOOL_UPDATE_BUDGET_SECS=20   # 1..120 seconds allowed for a whole watched-tool sweep; cut to fit FM_CHECK_TIMEOUT, and the cut is reported
