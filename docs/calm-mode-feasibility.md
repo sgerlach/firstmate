@@ -150,12 +150,13 @@ The current exact marker and the narrow bare-U+2063 `Supervisor escalate (` comp
 
 ## Calm working presentation
 
-Calm replaces Pi's stock working row with a small animated boat while Calm is on and one logical agent run is active.
+Calm replaces Pi's stock working row with a small animated working scene, the boat by default, while Calm is on and one logical agent run is active.
 This path uses only public extension API and patches nothing: `ExtensionUIContext.setWorkingVisible(false)` hides the stock row, and `setWidget()` installs a temporary component factory above the editor.
 Pi's documented custom working-indicator frames are static and width-blind, so they cannot own responsive geometry; a widget component receives `render(width)` and can.
 
 Within Firstmate Calm, `.pi/extensions/fm-calm.ts` remains the sole owner of its presentation choice and the only caller of `setWorkingVisible()`, while `.pi/extensions/lib/fm-calm-working-ship.ts` owns Pi's ANSI painting and the widget over the sprite geometry, bounce track, cadences, and freeze/resume state in `.claude/mods/firstmate-calm/lib/fm-calm-working-ship-sprite.ts`, the harness-neutral core the Claude Code mod also draws from (reached from the Pi tree through a tracked symlink, because Claude Code refuses a hooks-module import from outside the plugin folder).
-The second scene, the hawk over a land strip in `.claude/mods/firstmate-calm/lib/fm-calm-working-hawk-sprite.ts`, follows the same harness-neutral shape, but only the Claude Code mod draws it, when the `config/calm-scene` setting [`configuration.md`](configuration.md#calm-scene-configcalm-scene) owns selects it; Pi does not read that setting.
+The second scene, the hawk over a land strip in `.claude/mods/firstmate-calm/lib/fm-calm-working-hawk-sprite.ts`, follows the same harness-neutral shape, and both harnesses draw it when the `config/calm-scene` setting [`configuration.md`](configuration.md#calm-scene-configcalm-scene) owns selects it.
+On Pi, `.pi/extensions/fm-calm.ts` reads that setting and binds the selected scene's animation to the same widget, `.pi/extensions/lib/fm-calm-working-hawk.ts` paints the hawk's runs as standard ANSI escapes, and the core is reached through the tracked `.pi/extensions/lib/fm-calm-working-hawk-sprite.ts` symlink.
 Visibility follows `agent_start` through `agent_settled` rather than turns or tool calls.
 Pi emits `agent_settled` from a `finally` block once a run will not continue automatically, so retries, automatic continuations, queued follow-ups, and compaction inside one run never remove the boat, while settle, abort, and failure all reach the same cleanup.
 Repeated `agent_start` events inside one run are idempotent, and both Calm extensions use the shared `calm-working-ship` widget key, so Pi disposes the previous component before installing a replacement under that key and when it clears extension widgets, while Firstmate Calm's disposal signal prevents its cleanup from clearing a standalone Calm widget that replaced its own widget.
@@ -304,6 +305,7 @@ The same real-Pi reproduction then delivered the notification exactly once in a 
 `tests/fm-pi-branch-extension.test.sh` verifies both `fm_branch_outcomes` and `fm_branch_processed` call headers against pre-0.99 and 0.99+ Pi stock rendering, plus Calm toggling, capability-probed all-line versus collapsed stock result output, exact expanded output, and export rendering for outcomes.
 Together they exercise redraw of already-rendered tool, thinking, current operational-user, and legacy synthetic rows, and cover every policy class.
 It covers persisted preference restoration across every session-start reason and a real restart, proves the working-ship presentation and Calm-off stock `Working...` row through a delayed deterministic provider, asserts no Calm status row, verifies operational messages remain exact ordinary user-role session entries and complete exports, and drives genuine 100 by 44, 160 by 36, and 180 by 44 terminal fixtures.
+Its scene checks drive the extension's own handlers through the `config/calm-scene` value table the Claude Code mod's reader uses, and a real Pi TUI under tmux, loading the scene cores through the tracked symlinks, shows the hawk in place of the stock row with its standard colors, motion, resize and narrow-track reflow, freeze and resume, abort cleanup, a `/calm` twice switch to the ship, and the stock row with Calm off.
 A native deterministic `/skill:ahoy` turn produces thinking, tool-call, and tool-result blocks, asserts that the collapsed skill-to-final gap equals the two-row visible-only baseline, expands and re-collapses original thinking, restores Calm-off rendering, verifies persisted hidden history, and repeats the geometry assertion after restart with `terminal.clearOnShrink` explicitly off.
 The operational provider path covers Calm loaded on, loaded off, default preference, extension absent, exact watcher delivery, narrow bare-marker legacy input, persisted restart replay, a genuine captain prompt, and adjacent notifications coalesced into one intended processing turn.
 It asserts one persisted and rendered captain answer, exact user-role operational envelopes in order, no replacement custom messages, one processing result, zero operational transcript rows, and the two-row neighboring-assistant geometry for live, adjacent, and restart paths.
@@ -312,7 +314,7 @@ Queued-row coverage drives Pi's real listing and restore methods over a stand-in
 `tests/fm-calm-pi-queue-retention-live-e2e.test.sh` is the default-on, token-free guard that probes a running Pi session for every member the check requires and fails naming the installed Pi version.
 `tests/fm-pi-primary-live-e2e.test.sh` also proves the working ship replaces the built-in `Working...` row while Calm is active on the credentialed provider path, and that it clears when the run settles, before continuing its ordinary watcher lifecycle.
 `tests/fm-pi-primary-types.test.sh` performs strict no-emit TypeScript checking against whichever Pi declarations are installed, without pinning a version of its own.
-`tests/fm-calm-claude-mod.test.sh` needs no Claude Code binary: it proves the mod is one hooks module with no command, skill, agent, or classic hook that runs without that module, that Pi's working ship renders byte-for-byte the shared sprite core painted in ANSI at every width and step, that the hawk scene core keeps the captain's wing cycle, bird and land cadences, edge reversal, repeating strip, and color classes, that the Raster packing lays either scene's frame out exactly in its own palette, that the mod resolves its home and reads the preference and scene setting like Pi reads the preference, that its live and restored working-note classifiers enforce the visibility boundaries [`calm.md`](calm.md#claude-code) owns, and that its operational-input classifier agrees with `bin/fm-operational-input.sh` on a corpus the shell owner itself encodes plus legacy shapes and near misses.
+`tests/fm-calm-claude-mod.test.sh` needs no Claude Code binary: it proves the mod is one hooks module with no command, skill, agent, or classic hook that runs without that module, that Pi's working ship and working hawk render byte-for-byte their shared cores painted in standard ANSI at every width and step, that the hawk scene core keeps the captain's wing cycle, bird and land cadences, edge reversal, repeating strip, and color classes, that the Raster packing lays either scene's frame out exactly in its own palette, that the mod resolves its home and reads the preference and scene setting like Pi reads the preference, that its live and restored working-note classifiers enforce the visibility boundaries [`calm.md`](calm.md#claude-code) owns, and that its operational-input classifier agrees with `bin/fm-operational-input.sh` on a corpus the shell owner itself encodes plus legacy shapes and near misses.
 `tests/fm-calm-claude-mod-plugin.test.sh` runs wherever `claude` is installed without spending a model turn: strict `claude plugin validate` on the folder and on the `.claude/skills` auto-load path, then the mod's own `claude plugin test` suites, which drive the hooks module in the engine's host against a mocked clock, environment, file system, and drawing surface.
 `tests/fm-calm-claude-mod-live-e2e.test.sh` is the default-on, token-free guard in a real Claude Code TUI under tmux, isolated in a temporary `CLAUDE_CONFIG_DIR` with `tests/assets/fm-claude-scripted-messages-api.py` as the model: the mod loads with no opt-in and with the retired variable at `0`, Calm off draws the stock rows, `/calm` shows the moving boat and hides tool rows, the run-in-background hint, narration, and operational rows, toggles and persists, `claude --continue` restores the hidden rows, no model request carries a supervision note, and with `config/calm-scene` at `hawk` the hawk glides, flaps, and moves over its scrolling land in the working row instead of the boat, with every glyph accepted by the engine.
 
@@ -1023,7 +1025,7 @@ The Pi suite stays green against the unchanged shared libraries: `bin/fm-test-ru
 ## 2026-10-02 Claude Code 2.1.287 hawk working scene
 
 The Claude Code mod gained a second working scene: a hawk flying back and forth above a repeating land strip, in place of the sailboat.
-The per-home `config/calm-scene` setting selects it; [`calm.md`](calm.md#working-scenes-on-claude-code) owns the captain-facing contract and [`configuration.md`](configuration.md#calm-scene-configcalm-scene) the setting.
+The per-home `config/calm-scene` setting selects it; [`calm.md`](calm.md#working-scenes) owns the captain-facing contract and [`configuration.md`](configuration.md#calm-scene-configcalm-scene) the setting.
 The scene's geometry lives in `.claude/mods/firstmate-calm/lib/fm-calm-working-hawk-sprite.ts`, harness-neutral like the ship's core, but only the Claude Code mod draws it: Pi's extension and the shared libraries it imports are unchanged.
 The cell packing moved from `fm-calm-ship-raster.ts` to the scene-neutral `fm-calm-raster.ts`, each scene keeping its own palette and Raster key beside it.
 
@@ -1101,3 +1103,80 @@ ok - Pi Calm working ship keeps its centered two-row asymmetric Unicode boat ins
 ```
 
 The four earlier live steps passed unchanged in the same run, and the Pi suite stayed green on Pi 0.99.1 against the unchanged shared libraries.
+
+## 2026-10-25 Pi 1.4.0 hawk working scene
+
+Pi Calm now draws the hawk scene as well, when the per-home `config/calm-scene` setting selects it; [`calm.md`](calm.md#working-hawk-on-pi) owns the captain-facing contract and [`configuration.md`](configuration.md#calm-scene-configcalm-scene) the setting.
+The extension reaches the same harness-neutral hawk core the Claude Code mod draws through the tracked `.pi/extensions/lib/fm-calm-working-hawk-sprite.ts` symlink, so neither harness carries its own copy of the geometry or the cadences.
+Each scene keeps its own animation instance, and one widget draws whichever scene is selected under the shared `calm-working-ship` slot, so the hawk inherits the boat's one timer, freeze and resume, and stock-row lifecycle.
+
+### Width and colors on Pi
+
+Pi 1.4.0's `visibleWidth()` from `@earendil-works/pi-tui` 1.4.0 measured every glyph of the scene as one column: `↟`, `▁`, `╱`, `╲`, `─`, and `v` each measured 1, each wing pose 3, and the 52-glyph strip 52.
+The hawk's runs go out as the standard 16-color ANSI codes, and `tmux capture-pane -e` showed the terminal receiving exactly those: `\e[33m` before the bird, `\e[34m` before each run of mountain slopes, and `\e[32m` before each run of pines and meadow, closed by `\e[39m`, with no `38;5` or `38;2` escape.
+The terminal therefore paints its own palette entries 3, 4, and 2 on Pi, without the 256-color approximation the Claude Code Raster record above describes.
+
+### The live lab
+
+The lab ran Pi 1.4.0 in its regular TUI mode under tmux at 100 by 24 cells, with an isolated `FM_HOME` and `PI_CODING_AGENT_DIR`, a local provider that holds the turn until Escape, and no model token spent.
+The project carried `.pi/extensions/fm-calm.ts` and its libraries in the tracked layout, the scene cores and the preservation rule reached through relative symlinks into `.claude/mods/firstmate-calm/lib`, with `config/calm` at `on` and `config/calm-scene` at `hawk`.
+Frames about 0.7s apart showed the bird flying right one column about every 0.9s while the land passed left one column about every 1.8s; the first, fourth, and eighth frames:
+
+```text
+─v─
+↟↟▁↟╱╲▁↟↟↟▁▁╱╲╱╲▁↟▁▁↟↟↟▁╱╲▁▁↟▁↟↟▁▁╱╲▁↟↟▁▁▁↟▁╱╲╱╲▁↟↟▁↟↟▁↟╱╲▁↟↟↟▁▁╱╲╱╲▁↟▁▁↟↟↟▁╱╲▁▁↟▁↟↟▁▁╱╲▁↟↟▁▁▁↟▁╱╲╱╲
+
+   ─v─
+↟▁↟╱╲▁↟↟↟▁▁╱╲╱╲▁↟▁▁↟↟↟▁╱╲▁▁↟▁↟↟▁▁╱╲▁↟↟▁▁▁↟▁╱╲╱╲▁↟↟▁↟↟▁↟╱╲▁↟↟↟▁▁╱╲╱╲▁↟▁▁↟↟↟▁╱╲▁▁↟▁↟↟▁▁╱╲▁↟↟▁▁▁↟▁╱╲╱╲▁
+
+      ─v─
+↟╱╲▁↟↟↟▁▁╱╲╱╲▁↟▁▁↟↟↟▁╱╲▁▁↟▁↟↟▁▁╱╲▁↟↟▁▁▁↟▁╱╲╱╲▁↟↟▁↟↟▁↟╱╲▁↟↟↟▁▁╱╲╱╲▁↟▁▁↟↟↟▁╱╲▁▁↟▁↟↟▁▁╱╲▁↟↟▁▁▁↟▁╱╲╱╲▁↟↟
+```
+
+Resized to 12 columns in the same turn, the scene reflowed without wrapping, with the bird inside the shortened track:
+
+```text
+        ─v─
+╱╲▁↟↟↟▁▁╱╲╱╲
+```
+
+Escape removed the scene and left `Operation aborted`, with no residual row.
+After the setting was edited to `ship` and `/calm` ran twice, the next turn drew the boat, and with Calm off and the setting back at `hawk` the next turn drew Pi's stock row:
+
+```text
+  ◿│◣
+▁╲▁▁▁╱▁▁▁▁▁▂▂▂▃▃▄▄▄▄▄▃▃▃▂▂▁▁▁▁▁▁▂▂▂▃▃▃▄▄▄▄▄▄▄▃▃▃▂▂▂▁▁▁▁▁▁▂▂▃▃▃▄▄▄▄▄▄▃▃▂▂▂▁▁▁▁▁▁▂▂▂▃▃▃▄▄▄▄▄▃▃▂▂▁▁▁▁▁▁
+
+── ⠼ Working ───────────────────────────────────────────────────────────────────────────────────────
+```
+
+### Commands and output
+
+The type check used TypeScript 5.8.3 with the strict no-emit `tsconfig.json` of `tests/fm-pi-primary-types.test.sh`, over `.pi/extensions/fm-calm.ts` and every `lib/fm-calm-*.ts` and `lib/fm-operational-input.ts` it loads, against the installed Pi 1.4.0 declarations.
+
+```text
+$ pi --version
+1.4.0
+
+$ tsc -p <that tsconfig.json>
+(no output; exit 0)
+
+$ bash tests/fm-calm-claude-mod.test.sh
+ok - the Calm mod is one hooks module, linked into the project's auto-load path, with no command, skill, agent, or classic hook that runs without that module, and Pi reaches both scene cores through tracked symlinks
+ok - the Pi working ship renders byte-for-byte the shared sprite core's frame painted in standard ANSI, at every width, cadence step, freeze, clamp, and reset
+ok - the Pi working hawk renders byte-for-byte the shared hawk core's frame painted in standard ANSI yellow, blue, and green, within the width at every width, cadence step, freeze, clamp, and reset
+
+$ bash tests/fm-calm-pi-extension.test.sh
+ok - Pi Calm working ship keeps its centered two-row asymmetric Unicode boat inside a deterministic long-wave trough, paints all water standard blue and the whole boat standard yellow with balanced resets, keeps ANSI-stripped width exact, reverses cleanly at both edges and every width, clamps visible and hidden resizes, falls back deterministically when narrow, freezes and resumes across settle/start without hidden-time jumps or duplicate timers, resets only on a fresh session, and leaves Calm-off visibility untouched
+ok - Pi Calm reads config/calm-scene with the Claude Code mod's value table at session start and when /calm turns Calm on, draws the hawk in the shared working slot with one timer, standard yellow, blue, and green, the land alone below three columns, freezes and resumes each scene's own position, restarts on a fresh session, cleans up on settle and shutdown, and leaves Calm-off untouched
+ok - Pi calm native E2E replaces the stock working row with a moving, resize-clamped working ship that freezes and resumes across two working periods in one Pi session, clears on abort, keeps captain turns visible, hides exact operational user rows without changing persistence, restores stock rendering Calm-off, survives restart, and preserves export plus Ctrl+O behavior
+ok - Pi 1.4.0 Calm E2E draws the hawk config/calm-scene selects in place of the stock working row during a real provider wait, in standard yellow, blue, and green, flapping, gliding, flying, and scrolling its land, reflowing on resize and turning on a narrow track, freezing and resuming across working periods, leaving on abort, switching to the ship after the setting is edited and /calm runs twice, and keeping the stock row Calm-off
+
+$ bin/fm-test-run.sh tests/fm-calm-claude-mod.test.sh tests/fm-calm-pi-extension.test.sh tests/fm-test-run.test.sh
+FM_TEST_SUMMARY total=3 failed=0 skipped_gate=0 duration_ms=342782
+```
+
+The new checks fail against each fault they must catch.
+Against an extension that always draws the boat, the scene check stops at `Error: scene "hawk\n" drew ship instead of the hawk` and the real-TUI check at `not ok - Calm did not show the hawk during a real provider wait`.
+Against one that never re-reads the setting on `/calm`, the scene check stops at `Error: /calm twice did not switch to the edited scene`, and against one that re-reads it only after drawing, at `Error: turning Calm on mid-run drew the stale scene`.
+Against a hawk palette with a bright green, it stops at `Error: the pines and meadow are not standard ANSI green`.

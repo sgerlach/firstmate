@@ -8,7 +8,8 @@
 #     is byte-for-byte the shared frame painted with standard ANSI codes, so extracting
 #     the core changed nothing Pi draws;
 #   - the harness-neutral hawk scene core: its wing cycle, bird and land cadences, edge
-#     reversal, repeating land strip, color classes, and freeze/resume state;
+#     reversal, repeating land strip, color classes, and freeze/resume state, and the
+#     Pi widget's hawk, which is byte-for-byte the shared frame in standard ANSI codes;
 #   - the Raster packing of either scene's frame, each scene's palette, and the base64 encoder;
 #   - the pure presentation policy: home resolution, preference and scene values, working notes;
 #   - the pure supervision-note lines over a tail copy bin/fm-branch-outcome.sh writes;
@@ -26,6 +27,8 @@ set -u
 MOD="$ROOT/.claude/mods/firstmate-calm"
 PI_SHIP="$ROOT/.pi/extensions/lib/fm-calm-working-ship.ts"
 PI_SPRITE="$ROOT/.pi/extensions/lib/fm-calm-working-ship-sprite.ts"
+PI_HAWK="$ROOT/.pi/extensions/lib/fm-calm-working-hawk.ts"
+PI_HAWK_SPRITE="$ROOT/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts"
 OPERATIONAL_INPUT="$ROOT/bin/fm-operational-input.sh"
 TMP_ROOT=$(fm_test_tmproot fm-calm-claude-mod)
 
@@ -55,6 +58,10 @@ test_plugin_shape() {
   [ "$(node -e 'process.stdout.write(require("node:fs").realpathSync(process.argv[1]))' "$PI_SPRITE")" = \
     "$(node -e 'process.stdout.write(require("node:fs").realpathSync(process.argv[1]))' "$MOD/lib/fm-calm-working-ship-sprite.ts")" ] \
     || fail "the Pi sprite path does not resolve to the mod's shared core"
+  [ -L "$PI_HAWK_SPRITE" ] || fail "the Pi hawk sprite path is not a symlink to the shared hawk core"
+  [ "$(node -e 'process.stdout.write(require("node:fs").realpathSync(process.argv[1]))' "$PI_HAWK_SPRITE")" = \
+    "$(node -e 'process.stdout.write(require("node:fs").realpathSync(process.argv[1]))' "$MOD/lib/fm-calm-working-hawk-sprite.ts")" ] \
+    || fail "the Pi hawk sprite path does not resolve to the mod's shared hawk core"
   [ ! -e "$MOD/SKILL.md" ] || fail "the mod carries a SKILL.md and would load as a skill on every harness"
   cat >"$TMP_ROOT/shape.mjs" <<JS
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -79,7 +86,7 @@ console.log("shape-ok");
 JS
   out=$(run_node "$TMP_ROOT/shape.mjs" 2>&1) || fail "plugin shape: $out"
   assert_contains "$out" "shape-ok" "plugin shape check did not complete"
-  pass "the Calm mod is one hooks module, linked into the project's auto-load path, with no command, skill, agent, or classic hook that runs without that module"
+  pass "the Calm mod is one hooks module, linked into the project's auto-load path, with no command, skill, agent, or classic hook that runs without that module, and Pi reaches both scene cores through tracked symlinks"
 }
 
 test_shared_sprite_and_pi_rendering() {
@@ -358,6 +365,82 @@ JS
   out=$(run_node "$TMP_ROOT/hawk.mjs" 2>&1) || fail "hawk scene: $out"
   assert_contains "$out" "hawk-ok" "the hawk scene check did not complete"
   pass "the hawk scene core flaps twice then glides about four seconds, flies the bird at the boat's speed and scrolls the captain's 52-column land strip at half of it, reversing the land on the tick the bird turns, with one color class per land glyph and the ship's freeze, clamp, and reset behavior"
+}
+
+test_shared_hawk_and_pi_rendering() {
+  local out
+  cat >"$TMP_ROOT/pi-hawk.mjs" <<JS
+import { pathToFileURL } from "node:url";
+const pi = await import(pathToFileURL($(js_string "$PI_HAWK")).href);
+const core = await import(pathToFileURL($(js_string "$MOD") + "/lib/fm-calm-working-hawk-sprite.ts").href);
+const ESC = "\\u001b";
+// The captain's basic terminal colors as the standard 16-color ANSI codes: yellow bird,
+// blue mountains, green pines and meadow.
+const ANSI = { bird: ESC + "[33m", mountain: ESC + "[34m", pine: ESC + "[32m", meadow: ESC + "[32m" };
+const RESET = ESC + "[39m";
+const paint = (row) => row.map((run) => (run.color === "plain" ? run.text : ANSI[run.color] + run.text + RESET)).join("");
+const visible = (line) => Array.from(line.replace(/\\u001b\\[[0-9;]*m/g, "")).length;
+const check = (condition, message) => { if (!condition) throw new Error(message); };
+check(pi.CALM_WORKING_HAWK_TICKS_PER_MOVE === core.CALM_WORKING_HAWK_TICKS_PER_MOVE, "Pi re-exports a different bird cadence");
+check(pi.CALM_WORKING_HAWK_TICKS_PER_LAND_MOVE === core.CALM_WORKING_HAWK_TICKS_PER_LAND_MOVE, "Pi re-exports a different land cadence");
+let frames = 0;
+// 60 steps cover two full wing cycles, several bird moves, and several land moves.
+for (const width of [0, 1, 2, 3, 4, 5, 12, 40, 52, 53, 80, 121]) {
+  const animation = pi.createCalmWorkingHawkAnimation();
+  const sprite = core.createCalmWorkingHawkSprite();
+  for (let step = 0; step < 60; step += 1) {
+    const rendered = animation.render(width);
+    const expected = sprite.frame(width).map(paint);
+    check(JSON.stringify(rendered) === JSON.stringify(expected), \`Pi hawk diverged from the shared frame at width \${width} step \${step}: \${JSON.stringify(rendered)} vs \${JSON.stringify(expected)}\`);
+    check(
+      animation.position() === sprite.position() && animation.direction() === sprite.direction() &&
+        animation.pose() === sprite.pose() && animation.landOffset() === sprite.landOffset(),
+      \`Pi hawk state diverged at width \${width} step \${step}\`,
+    );
+    for (const line of rendered) check(visible(line) <= width, \`a Pi hawk line overflowed width \${width}\`);
+    if (width > 0) check(visible(rendered[rendered.length - 1]) === width, \`the Pi land row is not \${width} cells at step \${step}\`);
+    check(!/\\u001b\\[(38;|9[0-7]m)/.test(rendered.join("")), "the Pi hawk used a non-standard color escape");
+    animation.tick();
+    sprite.tick();
+    frames += 1;
+  }
+}
+// The first frame at width 8, byte for byte: the bird at the left edge over the strip's first eight cells.
+{
+  const animation = pi.createCalmWorkingHawkAnimation();
+  const [bird, land] = animation.render(8);
+  check(bird === ESC + "[33m╲v╱" + RESET, \`the bird is not one standard yellow run: \${JSON.stringify(bird)}\`);
+  const expectedLand = [
+    [ANSI.pine, "↟↟"], [ANSI.meadow, "▁"], [ANSI.pine, "↟"], [ANSI.mountain, "╱╲"], [ANSI.meadow, "▁"], [ANSI.pine, "↟"],
+  ].map(([code, text]) => code + text + RESET).join("");
+  check(land === expectedLand, \`the land is not standard blue mountains and green pines and meadow: \${JSON.stringify(land)}\`);
+}
+// Freeze and resume: restoring the last painted frame discards later ticks on both.
+{
+  const animation = pi.createCalmWorkingHawkAnimation();
+  const sprite = core.createCalmWorkingHawkSprite();
+  animation.render(30); sprite.frame(30);
+  for (let step = 0; step < 9; step += 1) { animation.tick(); sprite.tick(); }
+  animation.render(30); sprite.frame(30);
+  for (let step = 0; step < 6; step += 1) { animation.tick(); sprite.tick(); }
+  animation.restoreLastRendered(); sprite.restoreLastRendered();
+  check(
+    animation.position() === sprite.position() && animation.landOffset() === sprite.landOffset() && animation.pose() === sprite.pose(),
+    "restore diverged",
+  );
+  animation.clampToWidth(4); sprite.clampToWidth(4);
+  check(animation.position() === sprite.position() && animation.direction() === sprite.direction(), "a hidden clamp diverged");
+  animation.reset(); sprite.reset();
+  check(
+    animation.position() === 0 && animation.direction() === 1 && animation.landOffset() === 0 && animation.pose() === sprite.pose(),
+    "reset did not restore the initial state",
+  );
+}
+console.log("pi-hawk-ok frames=" + frames);
+JS
+  out=$(run_node "$TMP_ROOT/pi-hawk.mjs" 2>&1) || fail "Pi hawk: $out"
+  assert_contains "$out" "pi-hawk-ok frames=720" "the Pi hawk parity sweep did not cover every width and step"
+  pass "the Pi working hawk renders byte-for-byte the shared hawk core's frame painted in standard ANSI yellow, blue, and green, within the width at every width, cadence step, freeze, clamp, and reset"
 }
 
 test_presentation_policy() {
@@ -730,6 +813,7 @@ JS
 test_plugin_shape
 test_shared_sprite_and_pi_rendering
 test_hawk_sprite
+test_shared_hawk_and_pi_rendering
 test_raster_packing
 test_presentation_policy
 test_branch_notes_over_the_store_owner

@@ -26,14 +26,41 @@ Calm hides such a block only in the first case below:
 
 Streaming text and the genuine reply that ends a response remain visible.
 
+## Working scenes
+
+While Calm is on, both harnesses replace the working row with one of two animated scenes.
+The per-home `config/calm-scene` setting chooses it: `ship` draws the sailboat, and `hawk` draws the hawk.
+The sailboat is the default, so a home without the setting changes nothing.
+[`configuration.md`](configuration.md#calm-scene-configcalm-scene) owns the setting's values, its home resolution, and when an edit takes effect.
+The scene changes only the working row: what Calm hides and keeps visible is the same under either scene.
+[Working boat](#working-boat) describes the sailboat on Pi, and [Working sailboat on Claude Code](#working-sailboat-on-claude-code) describes it on Claude Code.
+
+### The working hawk
+
+With the hawk scene selected, the working row becomes a two-row scene: a hawk flying back and forth above a strip of land.
+
+The hawk looks like this:
+
+- The bird is three cells wide and has three wing poses: `╲v╱` with the wings up, `─v─` gliding, and `╱v╲` with the wings down.
+- It flaps twice, one pose per 220ms tick through the flat pose between beats, then glides for about four seconds (18 ticks, 3960ms).
+  The long glide keeps it feeling calm instead of busy.
+- It moves one column every 880ms, the boat's speed, and turns around at the edges of the row.
+- The land is a hand-drawn strip of 52 columns, `╱╲` mountains, `↟` pines, and `▁` meadow, that repeats across the row, so the same picture comes back every time.
+- The land moves one column every 1760ms, half the bird's speed, so the mountains feel farther away.
+  It passes in the direction opposite to the bird's travel and reverses on the tick the bird turns, as the water's trough follows the boat.
+- A row too narrow for the bird draws the land alone.
+
+The hawk is painted in basic terminal colors, whatever the theme: the whole bird in every pose is yellow, the `╱` and `╲` mountain slopes are blue, and the `↟` pines and the `▁` meadow are green.
+[Working hawk on Pi](#working-hawk-on-pi) and [Working hawk on Claude Code](#working-hawk-on-claude-code) describe how each harness sends those colors.
+
 ## Pi
 
 ### Working boat
 
-While Calm is active and an agent run is under way, Calm hides Pi's built-in `Working...` row and shows a small two-row animated boat in its place.
+While Calm is active and an agent run is under way, Calm hides Pi's built-in `Working...` row and shows a small two-row animated scene in its place: the boat this section describes by default, or the hawk that [Working hawk on Pi](#working-hawk-on-pi) describes when the [scene setting](#working-scenes) selects it.
 No separate Calm status row is added.
-The boat claims the same Pi working-row widget slot as the standalone Pi Calm extension, so a session that loads both Calms shows one boat rather than two, and turning Firstmate Calm off does not clear the standalone boat.
-While Calm is off, Pi's stock working row is left exactly as Pi renders it.
+Either scene claims the same Pi working-row widget slot as the standalone Pi Calm extension, so a session that loads both Calms shows one working scene rather than two, and turning Firstmate Calm off does not clear the standalone boat.
+While Calm is off, Pi's stock working row is left exactly as Pi renders it, whatever the scene setting says.
 
 The boat looks like this:
 
@@ -59,6 +86,14 @@ Within one Pi session and Calm extension lifetime, the next working period resum
 Hidden elapsed time does not advance the animation.
 A resize while hidden clamps the frozen boat to the new width without changing its valid travel direction.
 A fresh Pi session or new Calm extension lifetime starts at the normal initial position.
+
+### Working hawk on Pi
+
+With the hawk scene selected, Pi draws [the working hawk](#the-working-hawk) in the boat's place, with the same working-row slot, lifecycle, and cleanup as the boat.
+Pi sends the hawk's colors as the standard ANSI codes, yellow, blue, and green, with no theme lookup, bright variant, or 256-color or RGB escape, so the terminal paints its own palette entries for them.
+The land fills the usable width, and every resize reflows the scene without wrapping.
+Between working periods, the hawk keeps its own column, travel direction, wing cadence, and land position exactly as [Boat position between working periods](#boat-position-between-working-periods) describes for the boat.
+The boat and the hawk each keep their own position, so switching scenes never moves one to where the other stopped.
 
 ### What Calm hides on Pi
 
@@ -160,8 +195,10 @@ How Calm handles that shared slot depends on whether Calm was already on when th
 - `.claude/mods/firstmate-calm/lib/fm-calm-preservation.ts` owns the shared substantive mid-turn text rule, which Pi imports through its tracked symlink.
 - `.pi/extensions/lib/fm-calm-operational-user-layout.ts` owns the zero-height operational-user row adapter.
 - `.pi/extensions/lib/fm-calm-pending-operational-layout.ts` owns the queued-row adapter and its session capability check.
-- `.pi/extensions/lib/fm-calm-working-ship.ts` owns Pi's animated working presentation over the sprite geometry both harnesses share in `.claude/mods/firstmate-calm/lib/fm-calm-working-ship-sprite.ts`.
-- `.claude/mods/firstmate-calm/lib/fm-calm-working-hawk-sprite.ts` owns the hawk scene's geometry and cadences, which only the Claude Code mod draws today.
+- `.pi/extensions/fm-calm.ts` owns which scene the scene setting selects and when it is drawn.
+- `.pi/extensions/lib/fm-calm-working-ship.ts` owns Pi's animated working presentation, the widget every scene draws through, over the sprite geometry both harnesses share in `.claude/mods/firstmate-calm/lib/fm-calm-working-ship-sprite.ts`.
+- `.pi/extensions/lib/fm-calm-working-hawk.ts` owns the hawk's standard ANSI colors on Pi.
+- `.claude/mods/firstmate-calm/lib/fm-calm-working-hawk-sprite.ts` owns the hawk scene's geometry and cadences, which both harnesses draw; Pi imports it through its tracked symlink.
 
 ### Pi regression entry points
 
@@ -209,7 +246,7 @@ Toggling Calm redraws every hooked row already on screen, so rows drawn before t
 
 ### Working sailboat on Claude Code
 
-While Calm is on, and the [scene setting](#working-scenes-on-claude-code) below keeps its default, the stock working row (`Sauteing... (12s · 300 tokens)`) becomes the same two-row sailboat Pi draws, from the same shared sprite geometry.
+While Calm is on, and the [scene setting](#working-scenes) keeps its default, the stock working row (`Sauteing... (12s · 300 tokens)`) becomes the same two-row sailboat Pi draws, from the same shared sprite geometry.
 The sailboat fills the row inside the transcript margin.
 It repaints on the boat's 220ms cadence, with the hull moving every 880ms.
 It reflows on resize, and appears and disappears exactly where the stock row would.
@@ -225,31 +262,11 @@ The theme family follows the `theme` setting by its prefix, `dark` or `light`, a
 It uses the light set as the both-readable fallback for `auto`, custom, missing, or unreadable values.
 The Pi extension keeps its standard ANSI blue and yellow.
 
-### Working scenes on Claude Code
-
-The Claude Code mod can draw one of two working animations while Calm is on.
-The per-home `config/calm-scene` setting chooses it: `ship` draws the sailboat above, and `hawk` draws the hawk below.
-The sailboat is the default, so a home without the setting changes nothing.
-[`configuration.md`](configuration.md#calm-scene-configcalm-scene) owns the setting's values, its home resolution, and when an edit takes effect.
-The scene changes only the working row: what Calm hides and keeps visible is the same under either scene.
-Pi does not read the setting and always draws the sailboat.
-
 ### Working hawk on Claude Code
 
-With the hawk scene selected, the working row becomes a two-row scene: a hawk flying back and forth above a strip of land.
+With the hawk scene selected, the working row becomes [the working hawk](#the-working-hawk), filling the row inside the transcript margin and repainting on the hawk's 220ms tick.
 
-The hawk looks like this:
-
-- The bird is three cells wide and has three wing poses: `╲v╱` with the wings up, `─v─` gliding, and `╱v╲` with the wings down.
-- It flaps twice, one pose per 220ms tick through the flat pose between beats, then glides for about four seconds (18 ticks, 3960ms).
-  The long glide keeps it feeling calm instead of busy.
-- It moves one column every 880ms, the boat's speed, and turns around at the edges of the row.
-- The land is a hand-drawn strip of 52 columns, `╱╲` mountains, `↟` pines, and `▁` meadow, that repeats across the row, so the same picture comes back every time.
-- The land moves one column every 1760ms, half the bird's speed, so the mountains feel farther away.
-  It passes in the direction opposite to the bird's travel and reverses on the tick the bird turns, as the water's trough follows the boat.
-- A row too narrow for the bird draws the land alone.
-
-The hawk is painted in basic terminal colors, whatever the theme:
+Claude Code sends the hawk's basic terminal colors as RGB, whatever the theme:
 
 | Part | Color | RGB sent to the Raster |
 | --- | --- | --- |

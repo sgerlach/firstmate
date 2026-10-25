@@ -162,9 +162,8 @@ This preference is local to each Firstmate home and is not part of secondmate in
 
 ## Calm scene (config/calm-scene)
 
-The Claude Code Calm mod reads the optional local, gitignored `config/calm-scene` setting beside `config/calm`, under the same home resolution as the [Calm preference](#calm-preference-configcalm).
-It chooses which working animation replaces the working row while Calm is on, as [docs/calm.md](calm.md#working-scenes-on-claude-code) describes.
-The Pi Calm extension does not read this setting and always draws the sailboat.
+The Pi Calm extension and the Claude Code Calm mod read the optional local, gitignored `config/calm-scene` setting beside `config/calm`, under the same home resolution as the [Calm preference](#calm-preference-configcalm).
+It chooses which working animation replaces the working row while Calm is on, as [docs/calm.md](calm.md#working-scenes) describes.
 
 ### Values and default
 
@@ -179,8 +178,9 @@ Nothing writes this file: the captain edits it by hand.
 
 ### When a change takes effect
 
-The mod reads the setting on every `session.start`, lazily before the first row that draws ahead of that event, and again each time `/calm` turns Calm on.
-To switch scenes in a running session, edit the file and run `/calm` twice.
+The Pi extension reads the setting on every Pi `session_start`, including startup, new, resume, fork, and reload reasons, and again each time `/calm` turns Calm on.
+The Claude Code mod reads it on every `session.start`, lazily before the first row that draws ahead of that event, and again each time `/calm` turns Calm on.
+Neither reads it again when a run starts, so to switch scenes in a running session on either harness, edit the file and run `/calm` twice.
 A `/calm` that turns Calm off does not re-read it.
 This setting is local to each Firstmate home and is not part of secondmate inherited configuration.
 

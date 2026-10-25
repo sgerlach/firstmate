@@ -14,6 +14,8 @@ PENDING_OPERATIONAL_LAYOUT="$ROOT/.pi/extensions/lib/fm-calm-pending-operational
 VISIBILITY="$ROOT/.pi/extensions/lib/fm-calm-visibility.ts"
 WORKING_SHIP="$ROOT/.pi/extensions/lib/fm-calm-working-ship.ts"
 WORKING_SHIP_SPRITE="$ROOT/.pi/extensions/lib/fm-calm-working-ship-sprite.ts"
+WORKING_HAWK="$ROOT/.pi/extensions/lib/fm-calm-working-hawk.ts"
+WORKING_HAWK_SPRITE="$ROOT/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts"
 WATCH_EXT="$ROOT/.pi/extensions/fm-primary-pi-watch.ts"
 OPERATIONAL_INPUT="$ROOT/bin/fm-operational-input.sh"
 PI_OPERATIONAL_INPUT="$ROOT/.pi/extensions/lib/fm-operational-input.ts"
@@ -206,6 +208,8 @@ test_home_resolution() {
   cp "$VISIBILITY" "$fixture/project/.pi/extensions/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$fixture/project/.pi/extensions/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$fixture/project/.pi/extensions/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$fixture/project/.pi/extensions/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$fixture/project/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts"
   cp "$PI_OPERATIONAL_INPUT" "$fixture/project/.pi/extensions/lib/fm-operational-input.ts"
   ln -s "$PI_PACKAGE_DIR" "$fixture/project/node_modules/@earendil-works/pi-coding-agent"
   ln -s "$PI_PACKAGE_DIR/node_modules/@earendil-works/pi-tui" "$fixture/project/node_modules/@earendil-works/pi-tui"
@@ -331,6 +335,8 @@ test_pi_compat_degraded_adapter() {
   cp "$VISIBILITY" "$fixture/project/.pi/extensions/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$fixture/project/.pi/extensions/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$fixture/project/.pi/extensions/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$fixture/project/.pi/extensions/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$fixture/project/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts"
   cp "$PI_OPERATIONAL_INPUT" "$fixture/project/.pi/extensions/lib/fm-operational-input.ts"
   ln -s "$PI_PACKAGE_DIR" "$fixture/project/node_modules/@earendil-works/pi-coding-agent"
   ln -s "$PI_PACKAGE_DIR/node_modules/@earendil-works/pi-tui" "$fixture/project/node_modules/@earendil-works/pi-tui"
@@ -433,6 +439,8 @@ test_pi_compat_missing_adapter_exports() {
   cp "$VISIBILITY" "$fixture/project/.pi/extensions/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$fixture/project/.pi/extensions/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$fixture/project/.pi/extensions/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$fixture/project/.pi/extensions/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$fixture/project/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts"
   cp "$PI_OPERATIONAL_INPUT" "$fixture/project/.pi/extensions/lib/fm-operational-input.ts"
   printf '%s\n' '{"type":"module"}' >"$fixture/project/package.json"
   printf '%s\n' \
@@ -813,6 +821,8 @@ test_builtin_gate_load_time() {
   cp "$VISIBILITY" "$fixture/project/.pi/extensions/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$fixture/project/.pi/extensions/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$fixture/project/.pi/extensions/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$fixture/project/.pi/extensions/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$fixture/project/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts"
   cp "$PI_OPERATIONAL_INPUT" "$fixture/project/.pi/extensions/lib/fm-operational-input.ts"
   ln -s "$PI_PACKAGE_DIR" "$fixture/project/node_modules/@earendil-works/pi-coding-agent"
   ln -s "$PI_PACKAGE_DIR/node_modules/@earendil-works/pi-tui" "$fixture/project/node_modules/@earendil-works/pi-tui"
@@ -902,6 +912,8 @@ test_calm_activation_collision_and_regression_bound() {
   cp "$VISIBILITY" "$fixture/project/.pi/extensions/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$fixture/project/.pi/extensions/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$fixture/project/.pi/extensions/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$fixture/project/.pi/extensions/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$fixture/project/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts"
   cp "$PI_OPERATIONAL_INPUT" "$fixture/project/.pi/extensions/lib/fm-operational-input.ts"
   ln -s "$PI_PACKAGE_DIR" "$fixture/project/node_modules/@earendil-works/pi-coding-agent"
   ln -s "$PI_PACKAGE_DIR/node_modules/@earendil-works/pi-tui" "$fixture/project/node_modules/@earendil-works/pi-tui"
@@ -1119,6 +1131,8 @@ test_rendering_and_session_lifecycle() {
   cp "$VISIBILITY" "$fixture/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$fixture/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$fixture/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$fixture/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$fixture/lib/fm-calm-working-hawk-sprite.ts"
   cp "$ROOT/.pi/extensions/lib/fm-operational-input.ts" "$fixture/lib/fm-operational-input.ts"
   cp "$ROOT/.pi/extensions/lib/fm-branch-dispatch.ts" "$fixture/lib/fm-branch-dispatch.ts"
   cp "$ROOT/.pi/extensions/lib/fm-native-contract.ts" "$fixture/lib/fm-native-contract.ts"
@@ -1844,6 +1858,8 @@ test_calm_mid_turn_working_notes() {
   cp "$VISIBILITY" "$fixture/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$fixture/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$fixture/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$fixture/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$fixture/lib/fm-calm-working-hawk-sprite.ts"
   cp "$PI_OPERATIONAL_INPUT" "$fixture/lib/fm-operational-input.ts"
   ln -s "$PI_PACKAGE_DIR" "$fixture/node_modules/@earendil-works/pi-coding-agent"
   ln -s "$PI_PACKAGE_DIR/node_modules/@earendil-works/pi-tui" "$fixture/node_modules/@earendil-works/pi-tui"
@@ -2151,6 +2167,8 @@ test_operational_followup_turn_e2e() {
   cp "$VISIBILITY" "$project/.pi/extensions/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$project/.pi/extensions/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$project/.pi/extensions/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$project/.pi/extensions/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$project/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts"
   cp "$PI_OPERATIONAL_INPUT" "$project/.pi/extensions/lib/fm-operational-input.ts"
   printf '%s\n' '{"followUpMode":"all"}' >"$config/settings.json"
 
@@ -2520,6 +2538,8 @@ test_queued_operational_escape_e2e() {
   cp "$VISIBILITY" "$project/.pi/extensions/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$project/.pi/extensions/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$project/.pi/extensions/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$project/.pi/extensions/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$project/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts"
   cp "$PI_OPERATIONAL_INPUT" "$project/.pi/extensions/lib/fm-operational-input.ts"
   printf '%s\n' '{"followUpMode":"all"}' >"$config/settings.json"
 
@@ -2737,6 +2757,8 @@ test_hidden_block_geometry_e2e() {
   cp "$VISIBILITY" "$project/.pi/extensions/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$project/.pi/extensions/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$project/.pi/extensions/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$project/.pi/extensions/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$project/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts"
   cp "$PI_OPERATIONAL_INPUT" "$project/.pi/extensions/lib/fm-operational-input.ts"
   printf '%s\n' on >"$home/config/calm"
   printf '%s\n' '{"hideThinkingBlock":true,"terminal":{"clearOnShrink":false}}' >"$config/settings.json"
@@ -2989,6 +3011,8 @@ test_working_ship_geometry_and_lifecycle() {
   cp "$VISIBILITY" "$fixture/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$fixture/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$fixture/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$fixture/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$fixture/lib/fm-calm-working-hawk-sprite.ts"
   cp "$PI_OPERATIONAL_INPUT" "$fixture/lib/fm-operational-input.ts"
   ln -s "$PI_PACKAGE_DIR" "$fixture/node_modules/@earendil-works/pi-coding-agent"
   ln -s "$PI_PACKAGE_DIR/node_modules/@earendil-works/pi-tui" "$fixture/node_modules/@earendil-works/pi-tui"
@@ -3014,7 +3038,7 @@ const {
   CALM_WORKING_SHIP_TICK_MS,
   CALM_WORKING_SHIP_TICKS_PER_MOVE,
   createCalmWorkingShipAnimation,
-  createCalmWorkingShipWidget,
+  createCalmWorkingWidget,
 } = ship;
 
 const ESC = "\u001b";
@@ -3342,7 +3366,7 @@ for (const width of [40, 16, 8, 6, 5, 4, 3, 2]) {
   const frozenPhase = animation.waterPhase();
   check(frozenColumn > 0, `continuity setup never left the left edge: ${frozenColumn}`);
 
-  const first = createCalmWorkingShipWidget(tui, animation);
+  const first = createCalmWorkingWidget(tui, animation);
   check(first.render(40) && animation.position() === frozenColumn, "binding a widget moved the frozen boat");
   first.dispose();
   // Dispose freezes; further wall time without ticks must not change logical state.
@@ -3350,7 +3374,7 @@ for (const width of [40, 16, 8, 6, 5, 4, 3, 2]) {
   check(animation.direction() === frozenDirection, "dispose changed the frozen direction");
   check(animation.waterPhase() === frozenPhase, "dispose changed the frozen water phase");
 
-  const resumed = createCalmWorkingShipWidget(tui, animation);
+  const resumed = createCalmWorkingWidget(tui, animation);
   const firstFrame = resumed.render(40);
   check(
     animation.position() === frozenColumn && animation.direction() === frozenDirection,
@@ -3421,9 +3445,9 @@ for (const width of [40, 16, 8, 6, 5, 4, 3, 2]) {
     scenario.setup(edge);
     edge.render(12);
     const frozen = { column: edge.position(), direction: edge.direction(), phase: edge.waterPhase() };
-    const paused = createCalmWorkingShipWidget(tui, edge);
+    const paused = createCalmWorkingWidget(tui, edge);
     paused.dispose();
-    const again = createCalmWorkingShipWidget(tui, edge);
+    const again = createCalmWorkingWidget(tui, edge);
     again.render(12);
     check(
       edge.position() === frozen.column && edge.direction() === frozen.direction && edge.waterPhase() === frozen.phase,
@@ -3477,7 +3501,7 @@ for (const width of [40, 16, 8, 6, 5, 4, 3, 2]) {
   try {
     const tui = { renderRequests: 0, requestRender() { this.renderRequests += 1; } };
     const animation = createCalmWorkingShipAnimation();
-    const first = createCalmWorkingShipWidget(tui, animation);
+    const first = createCalmWorkingWidget(tui, animation);
     first.render(40);
     callbacks[callbacks.length - 1]();
     callbacks[callbacks.length - 1]();
@@ -3489,7 +3513,7 @@ for (const width of [40, 16, 8, 6, 5, 4, 3, 2]) {
       "dispose retained state from unpainted timer ticks",
     );
 
-    const resumed = createCalmWorkingShipWidget(tui, animation);
+    const resumed = createCalmWorkingWidget(tui, animation);
     resumed.render(40);
     for (let step = 0; step < CALM_WORKING_SHIP_TICKS_PER_MOVE; step += 1) {
       callbacks[callbacks.length - 1]();
@@ -3500,7 +3524,7 @@ for (const width of [40, 16, 8, 6, 5, 4, 3, 2]) {
     resumed.dispose();
 
     const committed = createCalmWorkingShipAnimation();
-    const progressing = createCalmWorkingShipWidget(tui, committed);
+    const progressing = createCalmWorkingWidget(tui, committed);
     progressing.render(40);
     callbacks[callbacks.length - 1]();
     progressing.render(40);
@@ -3510,7 +3534,7 @@ for (const width of [40, 16, 8, 6, 5, 4, 3, 2]) {
     check(committed.position() === 0, "dispose changed the committed column after an unpainted tick");
     check(committed.waterPhase() === renderedPhase, "dispose changed the committed phase after an unpainted tick");
 
-    const committedResume = createCalmWorkingShipWidget(tui, committed);
+    const committedResume = createCalmWorkingWidget(tui, committed);
     committedResume.render(40);
     for (let step = 0; step < CALM_WORKING_SHIP_TICKS_PER_MOVE - 2; step += 1) {
       callbacks[callbacks.length - 1]();
@@ -3539,7 +3563,7 @@ for (const width of [40, 16, 8, 6, 5, 4, 3, 2]) {
       }
       check(reached, `could not prepare bounce state ${targetPosition}/${targetDirection}`);
       const before = { position: edge.position(), direction: edge.direction(), phase: edge.waterPhase() };
-      const paused = createCalmWorkingShipWidget(tui, edge);
+      const paused = createCalmWorkingWidget(tui, edge);
       paused.render(12);
       for (let step = 0; step < CALM_WORKING_SHIP_TICKS_PER_MOVE; step += 1) {
         callbacks[callbacks.length - 1]();
@@ -3551,7 +3575,7 @@ for (const width of [40, 16, 8, 6, 5, 4, 3, 2]) {
           edge.waterPhase() === before.phase,
         `unpainted bounce tick escaped ${targetPosition}/${targetDirection}`,
       );
-      const resumedEdge = createCalmWorkingShipWidget(tui, edge);
+      const resumedEdge = createCalmWorkingWidget(tui, edge);
       resumedEdge.render(12);
       check(
         edge.position() === before.position && edge.direction() === before.direction,
@@ -3933,6 +3957,300 @@ JS
   fi
 }
 
+# The per-home config/calm-scene setting picks the working scene through the Calm
+# extension's own registered handlers: the value table matches the Claude Code mod's
+# reader (tests/fm-calm-claude-mod.test.sh), each scene keeps its own frozen position,
+# and the hawk shares the ship's one slot, one timer, and stock-row lifecycle.
+test_working_scene_selection_and_hawk_lifecycle() {
+  local fixture out status version
+  if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+    echo "skip: node or npm not found for Pi Calm working-scene test"
+    return 0
+  fi
+  if [ ! -f "$PI_PACKAGE_DIR/package.json" ]; then
+    echo "skip: installed @earendil-works/pi-coding-agent package not found"
+    return 0
+  fi
+  version=$(node -p "require('$PI_PACKAGE_DIR/package.json').version")
+  record_pi_version_evidence "$version" "Pi Calm working-scene assumptions"
+
+  fixture="$TMP_ROOT/working-scene"
+  mkdir -p "$fixture/home/config" "$fixture/lib" "$fixture/node_modules/@earendil-works"
+  cp "$EXT" "$fixture/fm-calm.ts"
+  cp "$ASSISTANT_LAYOUT" "$fixture/lib/fm-calm-assistant-layout.ts"
+  cp "$PRESERVATION" "$fixture/lib/fm-calm-preservation.ts"
+  cp "$OPERATIONAL_USER_LAYOUT" "$fixture/lib/fm-calm-operational-user-layout.ts"
+  cp "$PENDING_OPERATIONAL_LAYOUT" "$fixture/lib/fm-calm-pending-operational-layout.ts"
+  cp "$VISIBILITY" "$fixture/lib/fm-calm-visibility.ts"
+  cp "$WORKING_SHIP" "$fixture/lib/fm-calm-working-ship.ts"
+  cp "$WORKING_SHIP_SPRITE" "$fixture/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$fixture/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$fixture/lib/fm-calm-working-hawk-sprite.ts"
+  cp "$PI_OPERATIONAL_INPUT" "$fixture/lib/fm-operational-input.ts"
+  ln -s "$PI_PACKAGE_DIR" "$fixture/node_modules/@earendil-works/pi-coding-agent"
+  ln -s "$PI_PACKAGE_DIR/node_modules/@earendil-works/pi-tui" "$fixture/node_modules/@earendil-works/pi-tui"
+  ln -s "$PI_PACKAGE_DIR/node_modules/typebox" "$fixture/node_modules/typebox"
+  printf '%s\n' '{"type":"module"}' >"$fixture/package.json"
+  printf 'on\n' >"$fixture/home/config/calm"
+
+  out=$(cd "$fixture" && EXT="$fixture/fm-calm.ts" FM_HOME="$fixture/home" PI_PACKAGE_DIR="$PI_PACKAGE_DIR" node --input-type=module 2>&1 <<'JS'
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
+
+const packageRoot = process.env.PI_PACKAGE_DIR;
+const [{ initTheme, theme }, { visibleWidth, setCapabilities }] = await Promise.all([
+  import(pathToFileURL(`${packageRoot}/dist/modes/interactive/theme/theme.js`).href),
+  import(pathToFileURL(`${packageRoot}/node_modules/@earendil-works/pi-tui/dist/index.js`).href),
+]);
+initTheme("dark");
+setCapabilities({ images: null, trueColor: true, hyperlinks: false });
+const { CALM_WORKING_SHIP_WIDGET_KEY, CALM_WORKING_SHIP_TICK_MS } = await import(
+  pathToFileURL(`${process.cwd()}/lib/fm-calm-working-ship.ts`).href
+);
+const { CALM_WORKING_HAWK_TICKS_PER_MOVE } = await import(
+  pathToFileURL(`${process.cwd()}/lib/fm-calm-working-hawk.ts`).href
+);
+
+const ESC = "\u001b";
+const strip = (text) => text.replace(new RegExp(`${ESC}\\[[0-9;]*m`, "g"), "");
+const check = (condition, message) => {
+  if (!condition) throw new Error(message);
+};
+const scenePath = `${process.env.FM_HOME}/config/calm-scene`;
+const setScene = (value) => {
+  rmSync(scenePath, { recursive: true, force: true });
+  if (value === "<unreadable>") mkdirSync(scenePath);
+  else if (value !== undefined) writeFileSync(scenePath, value);
+};
+const POSE = /[╲─╱]v[╱─╲]/;
+// Which scene a working widget draws, read from its plain cells: the hawk's land strip
+// carries pines, the ship's top row its centered sail.
+const sceneOf = (widget) => {
+  const rows = widget.render(60).map(strip);
+  if (rows.length === 2 && POSE.test(rows[0]) && rows[1].includes("↟")) return "hawk";
+  if (rows.length === 2 && rows[0].includes("◿│◣") && rows[1].includes("╲▁▁▁╱")) return "ship";
+  return `unknown ${JSON.stringify(rows)}`;
+};
+const birdColumn = (widget) => strip(widget.render(60)[0]).search(POSE);
+const landRow = (widget) => strip(widget.render(60)[1]);
+const hullColumn = (widget) => strip(widget.render(60)[1]).indexOf("╲▁▁▁╱");
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+let liveTimers = 0;
+const realSetInterval = globalThis.setInterval;
+const realClearInterval = globalThis.clearInterval;
+globalThis.setInterval = (...args) => {
+  liveTimers += 1;
+  return realSetInterval(...args);
+};
+globalThis.clearInterval = (timer) => {
+  if (timer !== undefined) liveTimers -= 1;
+  return realClearInterval(timer);
+};
+
+const sessionWrites = [];
+const handlers = new Map();
+let calmCommand;
+const pi = {
+  events: { emit() {}, on() {} },
+  on(event, handler) {
+    const existing = handlers.get(event) ?? [];
+    existing.push(handler);
+    handlers.set(event, existing);
+  },
+  registerCommand(name, command) {
+    if (name === "calm") calmCommand = command;
+  },
+  registerEntryRenderer() {},
+  registerTool() {},
+  getAllTools() {
+    return [];
+  },
+  appendEntry: (...args) => sessionWrites.push(["appendEntry", ...args]),
+  sendMessage: (...args) => sessionWrites.push(["sendMessage", ...args]),
+  sendUserMessage: (...args) => sessionWrites.push(["sendUserMessage", ...args]),
+  setSessionName: (...args) => sessionWrites.push(["setSessionName", ...args]),
+};
+const extension = await import(pathToFileURL(process.env.EXT).href);
+extension.default(pi);
+check(!!calmCommand, "Calm command was not registered");
+
+let renderRequests = 0;
+const tui = { requestRender: () => { renderRequests += 1; } };
+const ui = {
+  workingVisible: [],
+  widgetOps: [],
+  widgets: new Map(),
+  setWorkingVisible(visible) {
+    this.workingVisible.push(visible);
+  },
+  // Pi's widget contract: the previous component under a key is disposed before a
+  // replacement is installed, and clearing disposes it too.
+  setWidget(key, content) {
+    const existing = this.widgets.get(key);
+    if (existing?.dispose) existing.dispose();
+    this.widgets.delete(key);
+    this.widgetOps.push({ key, action: content === undefined ? "clear" : "set" });
+    if (content === undefined) return;
+    this.widgets.set(key, typeof content === "function" ? content(tui, theme) : content);
+  },
+  getEditorText: () => "",
+  getToolsExpanded: () => false,
+  onTerminalInput: () => () => {},
+  setHiddenThinkingLabel() {},
+  setStatus() {},
+  setToolsExpanded() {},
+  notify() {},
+  theme,
+};
+const ctx = { ui };
+const fire = async (event, payload = {}) => {
+  for (const handler of handlers.get(event) ?? []) await handler(payload, ctx);
+};
+const working = () => ui.widgets.get(CALM_WORKING_SHIP_WIDGET_KEY);
+const reset = () => {
+  ui.workingVisible.length = 0;
+  ui.widgetOps.length = 0;
+};
+const expectCleared = (label) => {
+  check(liveTimers === 0, `${label} left ${liveTimers} animation timers`);
+  check(ui.widgets.size === 0, `${label} left a residual widget`);
+  check(ui.workingVisible[ui.workingVisible.length - 1] === true, `${label} did not restore Pi's stock working row`);
+};
+
+// --- Every stored value selects the scene the Claude Code mod's reader selects ------
+for (const [stored, expected] of [
+  ["hawk\n", "hawk"], ["hawk", "hawk"], [" hawk \n", "hawk"], ["ship\n", "ship"], ["", "ship"],
+  [undefined, "ship"], ["HAWK", "ship"], ["eagle", "ship"], ["hawk ship", "ship"], ["<unreadable>", "ship"],
+]) {
+  setScene(stored);
+  await fire("session_start", { reason: "new" });
+  reset();
+  await fire("agent_start");
+  const label = `scene ${JSON.stringify(stored)}`;
+  check(
+    ui.widgetOps.length === 1 && ui.widgetOps[0].key === CALM_WORKING_SHIP_WIDGET_KEY && ui.widgetOps[0].action === "set",
+    `${label} did not install exactly one working widget in the shared slot: ${JSON.stringify(ui.widgetOps)}`,
+  );
+  check(ui.workingVisible[ui.workingVisible.length - 1] === false, `${label} left Pi's stock working row visible`);
+  check(liveTimers === 1, `${label} kept ${liveTimers} animation timers instead of one`);
+  check(sceneOf(working()) === expected, `${label} drew ${sceneOf(working())} instead of the ${expected}`);
+  await fire("agent_settled");
+  expectCleared(label);
+}
+
+// --- The installed hawk widget: two rows in the viewport, standard colors, narrow fallback
+setScene("hawk\n");
+await fire("session_start", { reason: "new" });
+await fire("agent_start");
+{
+  const widget = working();
+  check(widget.handleInput === undefined, "the hawk widget accepts keyboard input");
+  for (const width of [3, 12, 60, 121]) {
+    const rows = widget.render(width);
+    check(rows.length === 2, `the hawk drew ${rows.length} rows at width ${width}`);
+    check(rows.every((line) => visibleWidth(line) <= width), `a hawk line overflowed width ${width}`);
+    check(visibleWidth(rows[1]) === width, `the land row is not ${width} cells wide`);
+  }
+  for (const width of [1, 2]) {
+    const rows = widget.render(width);
+    check(rows.length === 1 && !strip(rows[0]).includes("v") && visibleWidth(rows[0]) === width, `width ${width} did not draw the land alone`);
+  }
+  const [bird, land] = widget.render(60);
+  check(bird.includes(`${ESC}[33m`) && POSE.test(strip(bird)), "the bird is not standard ANSI yellow");
+  check(land.includes(`${ESC}[34m╱╲`), "the mountains are not standard ANSI blue");
+  check(land.includes(`${ESC}[32m↟`) && land.includes(`${ESC}[32m▁`), "the pines and meadow are not standard ANSI green");
+  check(!/\u001b\[(38;|9[0-7]m)/.test(bird + land), "the hawk used a non-standard color escape");
+  const before = renderRequests;
+  await wait(CALM_WORKING_SHIP_TICK_MS * 3);
+  check(renderRequests > before, "the hawk animation never requested a TUI render");
+}
+
+// --- Settle freezes the hawk; the next working period resumes it ------------------
+await wait(CALM_WORKING_SHIP_TICK_MS * CALM_WORKING_HAWK_TICKS_PER_MOVE * 3 + 40);
+const frozenColumn = birdColumn(working());
+const frozenLand = landRow(working());
+check(frozenColumn > 0, `the hawk never left the left edge: ${frozenColumn}`);
+await fire("agent_settled");
+expectCleared("settling the hawk");
+// Hidden wall time neither animates the removed widget nor advances the frozen hawk.
+const hiddenRequests = renderRequests;
+await wait(CALM_WORKING_SHIP_TICK_MS * CALM_WORKING_HAWK_TICKS_PER_MOVE * 2);
+check(renderRequests === hiddenRequests, "the hawk kept animating after its widget was removed");
+await fire("agent_start");
+check(liveTimers === 1 && ui.widgets.size === 1, "the resumed hawk did not install exactly one widget and timer");
+check(
+  birdColumn(working()) === frozenColumn && landRow(working()) === frozenLand,
+  `the hawk did not resume where it froze: ${frozenColumn} -> ${birdColumn(working())}`,
+);
+await fire("agent_settled");
+
+// --- The setting is read at session start and when /calm turns Calm on, not per run --
+setScene("ship\n");
+await fire("agent_start");
+check(sceneOf(working()) === "hawk", "a run re-read the scene setting without a /calm toggle");
+await fire("agent_settled");
+await calmCommand.handler("", ctx);
+check(ui.widgets.size === 0, "turning Calm off left a working widget");
+await calmCommand.handler("", ctx);
+// Edited after the toggle, so it must wait for the next toggle or session start.
+setScene("hawk\n");
+await fire("agent_start");
+check(sceneOf(working()) === "ship", "/calm twice did not switch to the edited scene");
+// Each scene keeps its own state: the ship starts at its own left edge, not the hawk's column.
+check(hullColumn(working()) === 0, `the ship inherited the hawk's position: ${hullColumn(working())}`);
+await fire("agent_settled");
+
+// Turning Calm on during a run reads the setting before it draws, so the edited scene shows at once.
+await calmCommand.handler("", ctx);
+await fire("agent_start");
+check(ui.widgets.size === 0 && liveTimers === 0, "Calm off drew a working scene");
+reset();
+await calmCommand.handler("", ctx);
+check(ui.widgetOps.length === 1 && ui.widgetOps[0].action === "set", "turning Calm on mid-run did not install the scene");
+check(sceneOf(working()) === "hawk", "turning Calm on mid-run drew the stale scene");
+check(
+  birdColumn(working()) === frozenColumn && landRow(working()) === frozenLand,
+  "the hawk lost its own frozen position while the ship was drawn",
+);
+await fire("agent_settled");
+
+// --- Calm off with the hawk selected leaves Pi's stock working row untouched --------
+await calmCommand.handler("", ctx);
+reset();
+await fire("agent_start");
+await fire("agent_settled");
+check(ui.widgetOps.length === 0, `Calm off installed a working widget with the hawk selected: ${JSON.stringify(ui.widgetOps)}`);
+check(ui.workingVisible.length === 0, "Calm off changed Pi's stock working row with the hawk selected");
+check(liveTimers === 0, "Calm off started an animation timer with the hawk selected");
+await calmCommand.handler("", ctx);
+
+// --- A fresh session restarts the hawk at the normal initial position ---------------
+await fire("session_start", { reason: "new" });
+await fire("agent_start");
+check(birdColumn(working()) === 0, `a fresh session did not restart the hawk at the left edge: ${birdColumn(working())}`);
+check(landRow(working()).startsWith("↟↟▁↟╱╲"), "a fresh session did not restart the land strip");
+
+// --- Shutdown, reload, and session replacement clean the hawk up --------------------
+for (const reason of ["quit", "reload", "new"]) {
+  if (ui.widgets.size === 0) await fire("agent_start");
+  check(liveTimers === 1, `${reason} setup did not start the hawk`);
+  await fire("session_shutdown", { reason });
+  expectCleared(`session_shutdown(${reason}) with the hawk`);
+  if (reason !== "quit") await fire("session_start", { reason });
+}
+
+check(sessionWrites.length === 0, `the working scene wrote session or transcript data: ${JSON.stringify(sessionWrites)}`);
+globalThis.setInterval = realSetInterval;
+globalThis.clearInterval = realClearInterval;
+JS
+)
+  status=$?
+  [ "$status" -eq 0 ] || fail "Pi Calm working-scene checks failed: $out"
+  [ -z "$out" ] || fail "Pi Calm working-scene test printed output: $out"
+  pass "Pi Calm reads config/calm-scene with the Claude Code mod's value table at session start and when /calm turns Calm on, draws the hawk in the shared working slot with one timer, standard yellow, blue, and green, the land alone below three columns, freezes and resumes each scene's own position, restarts on a fresh session, cleans up on settle and shutdown, and leaves Calm-off untouched"
+}
+
 # The rendered-DOM assertions below depend on a real browser, so the render step
 # itself is the part that fails for reasons that have nothing to do with Calm.
 # This pins that guard with real processes and no browser: one clean render, one
@@ -4078,6 +4396,8 @@ test_interactive_terminal_e2e() {
   cp "$VISIBILITY" "$project/.pi/extensions/lib/fm-calm-visibility.ts"
   cp "$WORKING_SHIP" "$project/.pi/extensions/lib/fm-calm-working-ship.ts"
   cp "$WORKING_SHIP_SPRITE" "$project/.pi/extensions/lib/fm-calm-working-ship-sprite.ts"
+  cp "$WORKING_HAWK" "$project/.pi/extensions/lib/fm-calm-working-hawk.ts"
+  cp "$WORKING_HAWK_SPRITE" "$project/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts"
   cp "$ROOT/.pi/extensions/lib/fm-operational-input.ts" "$project/.pi/extensions/lib/fm-operational-input.ts"
   cp "$ROOT/.pi/extensions/lib/fm-branch-dispatch.ts" "$project/.pi/extensions/lib/fm-branch-dispatch.ts"
   cp "$ROOT/.pi/extensions/lib/fm-native-contract.ts" "$project/.pi/extensions/lib/fm-native-contract.ts"
@@ -4981,6 +5301,386 @@ JS
   pass "Pi calm native E2E replaces the stock working row with a moving, resize-clamped working ship that freezes and resumes across two working periods in one Pi session, clears on abort, keeps captain turns visible, hides exact operational user rows without changing persistence, restores stock rendering Calm-off, survives restart, and preserves export plus Ctrl+O behavior"
 }
 
+# hawk_screen <file> [-e]: capture the visible pane, with color escapes when asked.
+hawk_screen() {
+  tmux -L "$TMUX_SOCKET" capture-pane -p ${2:+"$2"} -t "$TMUX_SESSION" >"$1" 2>/dev/null || : >"$1"
+}
+
+# hawk_land_line <file>: the land row, the one line that draws the strip's pines.
+hawk_land_line() {
+  grep -F '↟' "$1" | head -1
+}
+
+# hawk_bird_line <file>: the bird row, the one line that draws a wing pose.
+hawk_bird_line() {
+  grep -E '╲v╱|─v─|╱v╲' "$1" | head -1
+}
+
+# hawk_bird_column <line>: the bird's column, the spaces before it on its row.
+hawk_bird_column() {
+  local padding=${1%%[! ]*}
+  printf '%s\n' "${#padding}"
+}
+
+# hawk_pose <line>: up, glide, or down for the pose the bird row draws.
+hawk_pose() {
+  case "$1" in
+    *'╲v╱'*) printf 'up\n' ;;
+    *'─v─'*) printf 'glide\n' ;;
+    *'╱v╲'*) printf 'down\n' ;;
+  esac
+}
+
+# hawk_abort <file> <count>: Escape the running turn until Pi has recorded <count>
+# aborts and no scene row remains. Escape can land before a just-started run is
+# abortable, so it is resent rather than assumed.
+hawk_abort() {
+  local file=$1 count=$2 i=0
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" Escape
+  while [ "$i" -lt 200 ]; do
+    tmux -L "$TMUX_SOCKET" capture-pane -p -t "$TMUX_SESSION" -S -600 >"$file" 2>/dev/null || true
+    if ! grep -Fq '↟' "$file" && ! grep -Fq '╲▁▁▁╱' "$file" &&
+      [ "$(grep -Fc 'Operation aborted' "$file" || true)" -ge "$count" ]; then
+      return 0
+    fi
+    [ "$((i % 20))" -eq 19 ] && tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" Escape
+    sleep 0.05
+    i=$((i + 1))
+  done
+  return 1
+}
+
+# The hawk scene in a real Pi TUI, as the captain sees it: config/calm-scene selects it
+# at startup, it replaces the stock working row during a real provider wait in its
+# standard colors, flaps, glides, flies, and scrolls its land, reflows on resize and on
+# a narrow track, freezes and resumes across working periods, and leaves on abort.
+# Editing the setting and running /calm twice switches the same session to the ship,
+# and Calm off keeps Pi's stock row whatever the setting says.
+test_working_hawk_interactive_e2e() {
+  local project config home version snapshot colored line bird land i poses columns lands column previous direction next reversed freeze_column resume_column
+  if ! command -v pi >/dev/null 2>&1 || ! command -v tmux >/dev/null 2>&1; then
+    echo "skip: pi or tmux not found for the Pi Calm hawk E2E"
+    return 0
+  fi
+  version=$(pi --version 2>/dev/null || true)
+  record_pi_version_evidence "$version" "Pi Calm hawk E2E"
+
+  project="$TMP_ROOT/hawk-e2e-project"
+  config="$TMP_ROOT/hawk-e2e-config"
+  home="$TMP_ROOT/hawk-e2e-home"
+  snapshot="$TMP_ROOT/hawk-e2e-screen.txt"
+  colored="$TMP_ROOT/hawk-e2e-colored.txt"
+  mkdir -p "$project/.pi/extensions/lib" "$project/.claude/mods/firstmate-calm/lib" "$config" "$home/config"
+  fm_git_init_commit "$project"
+  : >"$project/AGENTS.md"
+  cp "$EXT" "$project/.pi/extensions/fm-calm.ts"
+  cp "$ASSISTANT_LAYOUT" "$project/.pi/extensions/lib/fm-calm-assistant-layout.ts"
+  cp "$OPERATIONAL_USER_LAYOUT" "$project/.pi/extensions/lib/fm-calm-operational-user-layout.ts"
+  cp "$PENDING_OPERATIONAL_LAYOUT" "$project/.pi/extensions/lib/fm-calm-pending-operational-layout.ts"
+  cp "$VISIBILITY" "$project/.pi/extensions/lib/fm-calm-visibility.ts"
+  cp "$WORKING_SHIP" "$project/.pi/extensions/lib/fm-calm-working-ship.ts"
+  cp "$WORKING_HAWK" "$project/.pi/extensions/lib/fm-calm-working-hawk.ts"
+  cp "$PI_OPERATIONAL_INPUT" "$project/.pi/extensions/lib/fm-operational-input.ts"
+  # Keep the tracked layout: Pi reaches both scene cores and the preservation rule
+  # through relative symlinks into the Claude Code mod, so Pi's own module loader
+  # resolves them here exactly as it does in a Firstmate checkout.
+  cp \
+    "$ROOT/.claude/mods/firstmate-calm/lib/fm-calm-preservation.ts" \
+    "$ROOT/.claude/mods/firstmate-calm/lib/fm-calm-working-ship-sprite.ts" \
+    "$ROOT/.claude/mods/firstmate-calm/lib/fm-calm-working-hawk-sprite.ts" \
+    "$project/.claude/mods/firstmate-calm/lib/"
+  cp -P "$PRESERVATION" "$WORKING_SHIP_SPRITE" "$WORKING_HAWK_SPRITE" "$project/.pi/extensions/lib/"
+  [ -L "$project/.pi/extensions/lib/fm-calm-working-hawk-sprite.ts" ] \
+    || fail "the hawk E2E fixture lost the tracked hawk sprite symlink"
+  cat >"$project/.pi/extensions/fm-calm-hawk-e2e.ts" <<'TS'
+import {
+  type AssistantMessage,
+  createAssistantMessageEventStream,
+} from "@earendil-works/pi-ai";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+
+// A local provider that holds every turn open until Escape aborts it, so the working
+// row stays up for as long as the checks need, with no network and no model tokens.
+export default function (pi: ExtensionAPI): void {
+  pi.registerProvider("calm-hawk-e2e", {
+    baseUrl: "http://127.0.0.1/unused",
+    apiKey: "test-only",
+    api: "calm-hawk-e2e-api",
+    models: [
+      {
+        id: "held",
+        name: "Held Calm working-scene fixture",
+        reasoning: false,
+        input: ["text"],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 4096,
+        maxTokens: 128,
+      },
+    ],
+    streamSimple(model, _context, options) {
+      const stream = createAssistantMessageEventStream();
+      const output: AssistantMessage = {
+        role: "assistant",
+        content: [],
+        api: model.api,
+        provider: model.provider,
+        model: model.id,
+        usage: {
+          input: 0,
+          output: 0,
+          cacheRead: 0,
+          cacheWrite: 0,
+          totalTokens: 0,
+          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+        },
+        stopReason: "aborted",
+        timestamp: Date.now(),
+      };
+      void (async () => {
+        await new Promise<void>((resolve) => {
+          const timer = setTimeout(resolve, 120000);
+          options?.signal?.addEventListener(
+            "abort",
+            () => {
+              clearTimeout(timer);
+              resolve();
+            },
+            { once: true },
+          );
+        });
+        stream.push({ type: "error", reason: "aborted", error: output });
+        stream.end();
+      })();
+      return stream;
+    },
+  });
+  pi.registerCommand("calm-hawk-e2e", {
+    description: "Start a held turn for the Calm working-scene fixture.",
+    handler: async (_args, ctx) => {
+      const model = ctx.modelRegistry.find("calm-hawk-e2e", "held");
+      if (!model || !(await pi.setModel(model))) {
+        throw new Error("could not select the held Calm working-scene model");
+      }
+      await pi.sendUserMessage("CALM_HAWK_E2E_PROMPT");
+    },
+  });
+}
+TS
+  printf '%s\n' '{"tui.input.submit":"alt+s"}' >"$config/keybindings.json"
+  printf 'on\n' >"$home/config/calm"
+  printf 'hawk\n' >"$home/config/calm-scene"
+
+  # An earlier E2E can leave its session lingering after Pi exits.
+  tmux -L "$TMUX_SOCKET" kill-session -t "$TMUX_SESSION" 2>/dev/null || true
+  tmux -L "$TMUX_SOCKET" new-session -d -s "$TMUX_SESSION" -x 120 -y 30 \
+    "cd '$project' && env FM_HOME='$home' PI_CODING_AGENT_DIR='$config' PI_OFFLINE=1 pi $PI_TUI_MODE_ARGS --approve --no-skills --no-prompt-templates --no-context-files; rc=\$?; printf '\nPI_EXIT=%s\n' \"\$rc\"; sleep 30" \
+    || fail "could not start the tmux session for the Pi Calm hawk E2E"
+  wait_for_text "$snapshot" "fm-calm-hawk-e2e.ts" \
+    || fail "Pi did not start with the Calm hawk fixture: $(cat "$snapshot")"
+
+  # The setting read at session start puts the hawk in place of the stock working row.
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" -l "/calm-hawk-e2e"
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" M-s
+  i=0
+  while [ "$i" -lt 200 ]; do
+    hawk_screen "$snapshot"
+    [ -n "$(hawk_land_line "$snapshot")" ] && [ -n "$(hawk_bird_line "$snapshot")" ] && break
+    sleep 0.025
+    i=$((i + 1))
+  done
+  land=$(hawk_land_line "$snapshot")
+  bird=$(hawk_bird_line "$snapshot")
+  [ -n "$land" ] && [ -n "$bird" ] || fail "Calm did not show the hawk during a real provider wait: $(cat "$snapshot")"
+  assert_contains "$(cat "$snapshot")" "CALM_HAWK_E2E_PROMPT" "the held turn's prompt is not on screen"
+  assert_not_contains "$(cat "$snapshot")" "Working" "Calm left Pi's stock working row visible beside the hawk"
+  assert_not_contains "$(cat "$snapshot")" '╲▁▁▁╱' "the ship drew although config/calm-scene selects the hawk"
+  assert_not_contains "$(cat "$snapshot")" '◿│◣' "the ship's sail drew although config/calm-scene selects the hawk"
+  [ "${#land}" -eq 120 ] || fail "the land row was ${#land} cells instead of the full 120-column row"
+  [ "$(grep -c -F '↟' "$snapshot")" -eq 1 ] || fail "the hawk drew more than one land row"
+  [ "$(grep -n -F '↟' "$snapshot" | cut -d: -f1)" -eq "$(($(grep -n -E '╲v╱|─v─|╱v╲' "$snapshot" | head -1 | cut -d: -f1) + 1))" ] \
+    || fail "the bird row is not directly above the land row"
+
+  # The captain's basic terminal colors as standard ANSI escapes, never 256-color or RGB.
+  hawk_screen "$colored" -e
+  line=$(grep -E '╲v╱|─v─|╱v╲' "$colored" | head -1)
+  case "$line" in
+    *'[33m╲v╱'*|*'[33m─v─'*|*'[33m╱v╲'*) : ;;
+    *) fail "the bird was not drawn in standard ANSI yellow: $line" ;;
+  esac
+  line=$(grep -F '↟' "$colored" | head -1)
+  case "$line" in
+    *'[34m╱╲'*) : ;;
+    *) fail "the mountains were not drawn in standard ANSI blue: $line" ;;
+  esac
+  case "$line" in
+    *'[32m↟'*|*'[32m▁'*) : ;;
+    *) fail "the pines and meadow were not drawn in standard ANSI green: $line" ;;
+  esac
+  case "$(grep -E '↟|╲v╱|─v─|╱v╲' "$colored")" in
+    *'[38;2;'*|*'[38;5;'*|*'[9'[0-7]'m'*) fail "the hawk used a non-standard color escape" ;;
+  esac
+
+  # The bird flaps and glides, flies, and the land scrolls beneath it. One wing cycle
+  # is 25 ticks of 220ms, so eight seconds sees both poses and several moves.
+  poses=" "
+  columns=" "
+  lands=""
+  i=0
+  while [ "$i" -lt 160 ]; do
+    hawk_screen "$snapshot"
+    bird=$(hawk_bird_line "$snapshot")
+    land=$(hawk_land_line "$snapshot")
+    [ -n "$bird" ] && [ -n "$land" ] || fail "the hawk left the screen during the held turn: $(cat "$snapshot")"
+    case "$poses" in *" $(hawk_pose "$bird") "*) ;; *) poses="$poses$(hawk_pose "$bird") " ;; esac
+    case "$columns" in *" $(hawk_bird_column "$bird") "*) ;; *) columns="$columns$(hawk_bird_column "$bird") " ;; esac
+    case "$lands" in *"$land"*) ;; *) lands="$lands$land"$'\n' ;; esac
+    case "$poses" in *' glide '*) case "$poses" in *' up '*|*' down '*)
+      [ "$(printf '%s' "$columns" | wc -w)" -ge 3 ] && [ "$(printf '%s' "$lands" | grep -c .)" -ge 2 ] && break ;;
+    esac ;; esac
+    sleep 0.05
+    i=$((i + 1))
+  done
+  case "$poses" in *' glide '*) : ;; *) fail "the hawk never glided (poses seen:$poses)" ;; esac
+  case "$poses" in *' up '*|*' down '*) : ;; *) fail "the hawk never flapped (poses seen:$poses)" ;; esac
+  [ "$(printf '%s' "$columns" | wc -w)" -ge 3 ] || fail "the hawk never flew across the row (columns seen:$columns)"
+  [ "$(printf '%s' "$lands" | grep -c .)" -ge 2 ] || fail "the land never scrolled under the hawk"
+
+  # Resizing the running TUI reflows the scene to the new width without wrapping.
+  tmux -L "$TMUX_SOCKET" set-option -t "$TMUX_SESSION" window-size manual
+  tmux -L "$TMUX_SOCKET" resize-window -t "$TMUX_SESSION" -x 100 -y 30
+  i=0
+  while [ "$i" -lt 200 ]; do
+    hawk_screen "$snapshot"
+    land=$(hawk_land_line "$snapshot")
+    [ -n "$land" ] && [ "${#land}" -eq 100 ] && break
+    sleep 0.05
+    i=$((i + 1))
+  done
+  [ "${#land}" -eq 100 ] || fail "after resizing to 100 columns the land row was ${#land} cells instead of 100"
+  [ "$(grep -c -F '↟' "$snapshot")" -eq 1 ] || fail "the land wrapped onto a second row after the resize"
+  while IFS= read -r line; do
+    [ "${#line}" -le 100 ] || fail "a rendered line was ${#line} cells after resizing to 100 columns"
+  done <"$snapshot"
+  column=$(hawk_bird_column "$(hawk_bird_line "$snapshot")")
+  [ "$column" -le 97 ] || fail "the bird sat at column $column and cannot fit in 100 columns"
+
+  # A narrow terminal shortens the track enough to see the bird turn at an edge.
+  tmux -L "$TMUX_SOCKET" resize-window -t "$TMUX_SESSION" -x 12 -y 20
+  previous=""
+  direction=0
+  reversed=0
+  i=0
+  while [ "$i" -lt 400 ]; do
+    hawk_screen "$snapshot"
+    bird=$(hawk_bird_line "$snapshot")
+    if [ -n "$bird" ]; then
+      column=$(hawk_bird_column "$bird")
+      if [ -n "$previous" ] && [ "$column" -ne "$previous" ]; then
+        next=1
+        [ "$column" -lt "$previous" ] && next=-1
+        if [ "$direction" -ne 0 ] && [ "$next" -ne "$direction" ]; then
+          reversed=1
+          break
+        fi
+        direction=$next
+      fi
+      previous=$column
+    fi
+    sleep 0.1
+    i=$((i + 1))
+  done
+  [ "$reversed" -eq 1 ] || fail "the hawk never turned at an edge of a narrow track"
+  land=$(hawk_land_line "$snapshot")
+  [ "${#land}" -eq 12 ] || fail "the narrow land row was ${#land} cells instead of exactly 12"
+  [ "$column" -le 9 ] || fail "the bird flew past the narrow track's edge at column $column"
+  tmux -L "$TMUX_SOCKET" resize-window -t "$TMUX_SESSION" -x 100 -y 30
+
+  # Typing still reaches the editor while the hawk animates.
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" -l "HAWKFOCUS"
+  wait_for_text "$snapshot" "HAWKFOCUS" || fail "keyboard input did not reach the editor while the hawk animated"
+  i=0
+  while [ "$i" -lt 9 ]; do
+    tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" BSpace
+    i=$((i + 1))
+  done
+
+  # Abort removes the scene; the next working period resumes the bird where it froze.
+  sleep 1
+  hawk_screen "$snapshot"
+  freeze_column=$(hawk_bird_column "$(hawk_bird_line "$snapshot")")
+  [ "$freeze_column" -gt 0 ] || fail "the freeze frame never left the left edge"
+  hawk_abort "$snapshot" 1 || fail "Escape did not remove the hawk: $(cat "$snapshot")"
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" -l "/calm-hawk-e2e"
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" M-s
+  resume_column=""
+  i=0
+  while [ "$i" -lt 200 ]; do
+    hawk_screen "$snapshot"
+    bird=$(hawk_bird_line "$snapshot")
+    if [ -n "$bird" ]; then
+      resume_column=$(hawk_bird_column "$bird")
+      break
+    fi
+    sleep 0.025
+    i=$((i + 1))
+  done
+  [ -n "$resume_column" ] || fail "the second working period never showed the hawk"
+  [ "$resume_column" -eq "$freeze_column" ] \
+    || fail "the second working period moved the bird from column $freeze_column to $resume_column instead of resuming"
+  hawk_abort "$snapshot" 2 || fail "Escape did not remove the resumed hawk"
+
+  # Editing the setting and running /calm twice switches this session to the ship.
+  printf 'ship\n' >"$home/config/calm-scene"
+  for i in 1 2; do
+    tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" -l "/calm"
+    tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" M-s
+    sleep 0.5
+  done
+  [ "$(cat "$home/config/calm")" = on ] || fail "/calm twice did not leave Calm on"
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" -l "/calm-hawk-e2e"
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" M-s
+  i=0
+  while [ "$i" -lt 200 ]; do
+    hawk_screen "$snapshot"
+    grep -Fq '╲▁▁▁╱' "$snapshot" && break
+    sleep 0.025
+    i=$((i + 1))
+  done
+  assert_contains "$(cat "$snapshot")" '╲▁▁▁╱' "/calm twice after editing the setting to ship did not draw the ship"
+  assert_not_contains "$(cat "$snapshot")" '↟' "the hawk's land stayed on screen after switching to the ship"
+  hawk_abort "$snapshot" 3 || fail "Escape did not remove the ship"
+
+  # Calm off keeps Pi's stock working row even with the hawk selected.
+  printf 'hawk\n' >"$home/config/calm-scene"
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" -l "/calm"
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" M-s
+  i=0
+  while [ "$i" -lt 100 ] && [ "$(cat "$home/config/calm")" != off ]; do
+    sleep 0.05
+    i=$((i + 1))
+  done
+  [ "$(cat "$home/config/calm")" = off ] || fail "/calm did not turn Calm off"
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" -l "/calm-hawk-e2e"
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" M-s
+  i=0
+  while [ "$i" -lt 200 ]; do
+    hawk_screen "$snapshot"
+    grep -Eq "Working(\\.\\.\\.)?([[:space:]]|─|$)" "$snapshot" && break
+    sleep 0.025
+    i=$((i + 1))
+  done
+  assert_contains "$(cat "$snapshot")" "Working" "Calm off did not keep Pi's stock working row with the hawk selected"
+  assert_not_contains "$(cat "$snapshot")" '↟' "Calm off drew the hawk"
+  hawk_abort "$snapshot" 4 || fail "Escape did not stop the Calm-off turn"
+  [ "$(cat "$home/config/calm-scene")" = hawk ] || fail "the session changed the scene setting"
+
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" -l "/quit"
+  tmux -L "$TMUX_SOCKET" send-keys -t "$TMUX_SESSION" M-s
+  wait_for_text "$snapshot" "PI_EXIT=0" || fail "Pi did not exit cleanly after the hawk E2E"
+  tmux -L "$TMUX_SOCKET" kill-session -t "$TMUX_SESSION" 2>/dev/null || true
+  pass "Pi $version Calm E2E draws the hawk config/calm-scene selects in place of the stock working row during a real provider wait, in standard yellow, blue, and green, flapping, gliding, flying, and scrolling its land, reflowing on resize and turning on a narrow track, freezing and resuming across working periods, leaving on abort, switching to the ship after the setting is edited and /calm runs twice, and keeping the stock row Calm-off"
+}
+
 test_home_resolution
 test_pi_compat_no_upper_bound
 test_pi_compat_degraded_adapter
@@ -4994,5 +5694,7 @@ test_operational_followup_turn_e2e
 test_queued_operational_escape_e2e
 test_hidden_block_geometry_e2e
 test_working_ship_geometry_and_lifecycle
+test_working_scene_selection_and_hawk_lifecycle
 test_export_dom_render_guard
 test_interactive_terminal_e2e
+test_working_hawk_interactive_e2e

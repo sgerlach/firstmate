@@ -5,8 +5,10 @@
 // Like ./fm-calm-working-ship-sprite.ts, this module owns the geometry, the bounce
 // track, the cadences, the color classes, and the freeze/resume state, and paints each
 // frame as rows of color-tagged runs rather than bytes, so a harness renders the runs
-// its own way. Today only the Claude Code mod draws this scene (../hooks/register.ts
-// through ./fm-calm-hawk-raster.ts); the Pi extension keeps the ship. docs/calm.md owns
+// its own way: the Claude Code mod through ../hooks/register.ts and
+// ./fm-calm-hawk-raster.ts, and the Pi extension through
+// `.pi/extensions/lib/fm-calm-working-hawk.ts`, which reaches this file through the
+// tracked `.pi/extensions/lib/fm-calm-working-hawk-sprite.ts` symlink. docs/calm.md owns
 // the captain-facing contract and docs/configuration.md the scene setting.
 //
 // Nothing here imports a harness: every glyph is one terminal column under both

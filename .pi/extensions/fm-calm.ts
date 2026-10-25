@@ -5,9 +5,11 @@
 // agent_settled, ExtensionUIContext.setToolsExpanded(), setWorkingVisible(), setWidget()
 // with a disposable component factory, and setHiddenThinkingLabel().
 // ./lib/fm-calm-working-ship.ts owns the animated working presentation this file
-// installs. The focused tests pin those assumptions but never reject a
-// newer Pi solely for its version. The collapsed-thinking, operational-user, and
-// queued-operational presentation adapters probe the exact API they patch and degrade
+// installs, and ./lib/fm-calm-working-hawk.ts the hawk scene's palette; this file owns
+// which scene the per-home calm-scene setting selects. The focused tests pin those
+// assumptions but never reject a newer Pi solely for its version. The collapsed-thinking,
+// operational-user, and queued-operational presentation adapters probe the exact API
+// they patch and degrade
 // independently with a diagnostic (see installCalmPresentationAdapter below) if a future
 // Pi removes it; Pi still exposes no global renderer for arbitrary built-in or custom rows.
 // docs/configuration.md owns the home-local Calm preference contract.
@@ -53,10 +55,11 @@ import {
   installCalmPendingOperationalLayout,
   refreshCalmPendingOperationalRows,
 } from "./lib/fm-calm-pending-operational-layout.ts";
+import { createCalmWorkingHawkAnimation } from "./lib/fm-calm-working-hawk.ts";
 import {
   CALM_WORKING_SHIP_WIDGET_KEY,
   createCalmWorkingShipAnimation,
-  createCalmWorkingShipWidget,
+  createCalmWorkingWidget,
 } from "./lib/fm-calm-working-ship.ts";
 import {
   calmPresentationHides,
@@ -92,6 +95,9 @@ type StandardShellState = {
   call?: Component;
   result?: Component;
 };
+
+/** The working scenes Calm can draw; docs/configuration.md owns the setting that picks one. */
+type CalmWorkingScene = "ship" | "hawk";
 
 const extensionFile = fileURLToPath(import.meta.url);
 const extensionDir = dirname(extensionFile);
@@ -131,15 +137,18 @@ export default function (pi: ExtensionAPI) {
   let exportRendering = false;
   let removeTerminalInputHandler: (() => void) | undefined;
   // One logical agent run, tracked from agent_start through agent_settled rather than
-  // from turns or tool calls, so the boat never flickers between tool calls, automatic
+  // from turns or tool calls, so the scene never flickers between tool calls, automatic
   // continuations, retries, or compaction that stay inside the same run.
   let agentRunActive = false;
-  let workingShipShown = false;
-  let workingShipWidgetDisposed = false;
-  // One animation instance per extension lifetime. Hiding the working widget freezes
-  // this state; the next working period resumes it. session_start resets it so a fresh
-  // Pi session starts at the normal initial position. Never module-global.
+  let workingSceneShown = false;
+  let workingWidgetDisposed = false;
+  // One animation instance per scene per extension lifetime, so each scene keeps its
+  // own position. Hiding the working widget freezes the drawn scene's state; the next
+  // working period resumes it. session_start resets both so a fresh Pi session starts
+  // at the normal initial position. Never module-global.
   const workingShipAnimation = createCalmWorkingShipAnimation();
+  const workingHawkAnimation = createCalmWorkingHawkAnimation();
+  let workingScene: CalmWorkingScene = "ship";
 
   // Single owner of Calm's working-row presentation choice. The widget is only created
   // or removed on a real transition, so repeated starts cannot duplicate its timer.
@@ -149,26 +158,27 @@ export default function (pi: ExtensionAPI) {
     ui: ExtensionUIContext,
     forceStockVisibility = false,
   ): void => {
-    const showShip = agentRunActive && calmPresentationIsActive();
-    if (showShip !== workingShipShown) {
-      workingShipShown = showShip;
-      if (showShip) {
+    const showScene = agentRunActive && calmPresentationIsActive();
+    if (showScene !== workingSceneShown) {
+      workingSceneShown = showScene;
+      if (showScene) {
+        const animation = workingScene === "hawk" ? workingHawkAnimation : workingShipAnimation;
         ui.setWidget(CALM_WORKING_SHIP_WIDGET_KEY, (tui) => {
-          workingShipWidgetDisposed = false;
-          const widget = createCalmWorkingShipWidget(tui, workingShipAnimation);
+          workingWidgetDisposed = false;
+          const widget = createCalmWorkingWidget(tui, animation);
           const dispose = widget.dispose;
           widget.dispose = () => {
-            workingShipWidgetDisposed = true;
+            workingWidgetDisposed = true;
             dispose();
           };
           return widget;
         });
         ui.setWorkingVisible(false);
-      } else if (!workingShipWidgetDisposed) {
+      } else if (!workingWidgetDisposed) {
         ui.setWidget(CALM_WORKING_SHIP_WIDGET_KEY, undefined);
         ui.setWorkingVisible(true);
       }
-    } else if (forceStockVisibility && !showShip && !workingShipWidgetDisposed) {
+    } else if (forceStockVisibility && !showScene && !workingWidgetDisposed) {
       ui.setWorkingVisible(true);
     }
   };
@@ -176,6 +186,17 @@ export default function (pi: ExtensionAPI) {
   const fmHome = process.env.FM_HOME || process.env.FM_ROOT_OVERRIDE || root;
   const configDirectory = process.env.FM_CONFIG_OVERRIDE || resolve(fmHome, "config");
   const calmPreferencePath = resolve(configDirectory, "calm");
+  const calmScenePath = resolve(configDirectory, "calm-scene");
+  // Exactly "hawk" after trimming selects the hawk; "ship", an absent or unreadable
+  // file, and any other value keep the default boat. docs/configuration.md owns the
+  // setting, which the Claude Code Calm mod reads the same way.
+  const loadCalmScene = (): CalmWorkingScene => {
+    try {
+      return readFileSync(calmScenePath, "utf8").trim() === "hawk" ? "hawk" : "ship";
+    } catch {
+      return "ship";
+    }
+  };
   // "max" is the legacy value written by the removed third presentation level, whose
   // behavior is now ordinary Calm; a home upgraded from it restores as on rather than
   // dropping to off. docs/configuration.md owns the persisted value schema.
@@ -433,9 +454,11 @@ export default function (pi: ExtensionAPI) {
     setCalmStockExportRendering(false);
     publishPresentationState();
     agentRunActive = false;
-    workingShipShown = false;
-    // A genuine new session lifetime starts the boat at the normal initial position.
+    workingSceneShown = false;
+    workingScene = loadCalmScene();
+    // A genuine new session lifetime starts either scene at the normal initial position.
     workingShipAnimation.reset();
+    workingHawkAnimation.reset();
     applyWorkingPresentation(ctx.ui, true);
     ctx.ui.setHiddenThinkingLabel(calmPresentationIsActive() ? "" : undefined);
     ctx.ui.setStatus("firstmate-calm", undefined);
@@ -498,6 +521,9 @@ export default function (pi: ExtensionAPI) {
       persistCalmPreference(active);
       setCalmPresentation(active);
       if (active) activateBuiltInsIfNeeded(ctx.ui);
+      // Turning on re-reads the scene setting before any scene is drawn, so an edited
+      // choice shows without a restart.
+      if (active) workingScene = loadCalmScene();
       publishPresentationState();
       applyWorkingPresentation(ctx.ui, true);
       // Pi re-runs every assistant row's layout from this call even when the label is
