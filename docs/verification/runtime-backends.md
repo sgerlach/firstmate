@@ -2419,3 +2419,27 @@ A throwaway scout was spawned through `bin/fm-spawn.sh --scout --harness omp --m
 6. `bin/fm-control.sh <id> exit` stopped the agent and `bin/fm-teardown.sh` returned the worktree and closed the item.
 
 `FM_OMP_LIVE_E2E=1 tests/fm-omp-primary-live-e2e.test.sh` refreshes the primary evidence; the worker path above is refreshed by repeating the scout dispatch after any omp upgrade.
+
+## Pi single-bang AWS SSO login notice
+
+Verified on 2026-11-24 UTC on macOS 27.0.1 arm64 with installed Pi 1.6.0, Node 24.21.0 and tmux 3.6a.
+The operator contract is owned by [configuration](../configuration.md#pi-single-bang-aws-sso-login-notice).
+The default-on live guard drives a real interactive Pi in a private tmux server.
+A faux in-process provider records every request it receives, a fake `aws` prints canary URL, code, stderr and result lines, and the home, agent, session and temporary directories are scratch; no request reaches an inference endpoint.
+
+```sh
+bash tests/fm-pi-aws-sso-login-live-e2e.test.sh
+ok - Pi 1.6.0: a profile login shows its output live, withholds it from the model and notifies after its own record
+ok - Pi 1.6.0: SSO session and bare logins notify with only the typed selector
+ok - Pi 1.6.0: a failed login keeps its output on screen only, and Firstmate gets no notice
+ok - Pi 1.6.0: Escape cancels a login without a notice, and no session or output file holds its raw output
+ok - Pi 1.6.0: a double-bang login stays stock: shown, excluded from context, and silent
+ok - Pi 1.6.0: ordinary commands, model tool calls and ambiguous shell forms stay stock
+```
+
+The guard's positive controls show the canaries reaching a model request through an ordinary single-bang command, a model `bash` tool call and an unrecognized `&&` form, so an absent canary in the login cases is not a blind check.
+`tests/fm-pi-aws-sso-login.test.sh` pins recognition, output withholding, delivery options and the worker gate without a running Pi.
+`tests/fm-pi-primary-types.test.sh` typechecks both files strictly with TypeScript 7.0.2.
+Against Pi 1.1.0 it passed; against Pi 1.2.0 and 1.6.0 it reported no error in either file, only errors in other tracked extensions.
+Only Pi 1.6.0 ran live.
+No Linux, Windows, pi-signed, omp, RPC-mode or native-adapter run is claimed.

@@ -159,6 +159,37 @@ The Claude Code mod reloads it on every `session.start`, including same-process 
 It also loads the preference lazily before any row that can draw ahead of that event, including during `claude --continue` restoration.
 This preference is local to each Firstmate home and is not part of secondmate inherited configuration.
 
+## Pi single-bang AWS SSO login notice
+
+The tracked `.pi/extensions/fm-aws-sso-login.ts` extension handles one command in an interactive Firstmate Pi session: a single-bang `aws sso login`.
+It keeps the command's raw output out of model context and tells Firstmate when the login exits 0.
+It has no configuration and loads through the same trusted Pi project auto-discovery as the other tracked Pi extensions.
+
+It recognizes only these exact commands after the single `!`:
+
+- `aws sso login`
+- `aws sso login --profile <name>` or `aws sso login --profile=<name>`
+- `aws sso login --sso-session <name>` or `aws sso login --sso-session=<name>`
+
+A name starts with a letter, digit or underscore, continues with letters, digits, `.`, `_`, `@`, `+` or `-`, and has at most 64 characters.
+Any other flag, a second selector, an environment prefix, a path-qualified `aws`, quoting, expansion, redirection, a pipeline, a command list or a newline leaves the command unrecognized, and Pi runs it exactly as before, with its output in model context.
+Use `!!` for such a login to keep its output out of model context.
+
+A recognized login runs through Pi's own shell backend with the configured shell and command prefix, and Escape cancels it as usual.
+Pi records a fixed withheld-output line as the command's output, so the raw output, browser URL and login code never reach a model request, a compaction or branch summary, or the session file.
+While the login runs, its output appears in a widget above the editor, so the URL and code stay readable.
+The widget clears on success; after a failure it keeps the output until the next typed input or single-bang command, and that output still never reaches the session.
+
+After exit 0, Firstmate receives an `aws-sso-login` operational input.
+It names only the typed selector, or says that none was given; it never infers a profile from the environment or the AWS configuration.
+It states that exit 0 is not proof that any dependency works and grants no new authority, and it asks Firstmate to re-verify the specific blocked dependency with that dependency's own check.
+The notice opens a turn, or follows the running one; while the away-posture record exists it waits for the next prompt instead.
+A failed, cancelled or errored login sends no notice.
+
+Double-bang commands, other single-bang commands, model tool calls and non-interactive Pi modes such as RPC stay unchanged.
+Task workers keep stock behavior, a Pi secondmate loads only the extensions its launch names, and other harnesses, omp included, are unchanged.
+[Runtime backend verification](verification/runtime-backends.md#pi-single-bang-aws-sso-login-notice) records the live evidence.
+
 ## Pi supervision branch
 
 On a Pi primary, an in-process supervision branch handles eligible task-local wake rows and selected heartbeat reviews.
